@@ -31,11 +31,13 @@ We expect the data to have the following properties:
     - DAD (the response), 
     - CNISP, PTSOS, and RVDSS (the covariates), 
     - date (as a datetime, e.g. from `lubridate::ymd()`)
+    - (Note that the column names could be anything; a formula will communicate the names to the functions).
 - The covariates may have missing values, which will be imputed.
 - The last date for which at least one of the covariates are available is the date to be nowcasted.
 - The response is NA for the period to be nowcasted.
+	- All NA values in the response up until the last observed covariate value will be nowcasted. The user does not need to specify a date range.
 
-We will implement a check function to ensure this:
+We will implement a check function to ensure these are correctly specified:
 
 ```r
 check_data(data, formula = NULL, date_col = NULL)
