@@ -49,3 +49,6 @@ The first is imputeTS, a package in R for imputing univariate time series. It ha
 
 ## Nowcasting
 
+Starting with defining the specific problem that we are wanting to solve. When referring to nowcasting we denote the measurement of DAD at time $t$ by the value $Y_t$ and the measurements of the explanatory variables at time $t$ to be a vector of values $X_{j,t}$ where $j \in \{1,2,3\}$ represents CNISP, PTSOS, and RVDSS. Then the problem that we are working is how to predict the value of $Y_t$ given the values $X_{j,t}$ and $Y_{t-1}$.
+
+We will be making several key assumptions in this project. The first is that the data for the explanatory variables can be at least somewhat successfully imputed by reasonable estimates. We will also assume that we have access to all the updated values of the explanatory variables at the time $t$ when we are making a prediction for $Y_t$. Devan, is this a good/valid assumption to make?
