@@ -11,7 +11,7 @@ now_simple_lm <- function(newX, model) {
 #' @param NewX The known x values to be nowcast on.
 #' @param model The model to use for predictions.
 now_simple_arx <- function(newX, model) {
-  predict(model, newxreg = newX, n.ahead = length(newX))
+  predict(model, newxreg = newX)
 }
 
 #' Return the number of NA's at the end of a vector (internal)
