@@ -63,8 +63,15 @@ simulate_data <- function(
       cnisp = ifelse(cnisp < 0, 0, round(cnisp, 0)),
       ptsos = ifelse(ptsos < 0, 0, round(ptsos, 0)),
       npos = round(npos, 0)
+    ) |>
+    dplyr::group_by(prov) |>
+    dplyr::mutate(
+      dad = dplyr::if_else(
+        condition = date > lubridate::ymd("2021-12-21"), 
+        true = NA, 
+        false = dad
+      )
     )
-  dada$dad[(length(dada$dad) - to_nowcast + 1):length(dada$dad)] <- NA
   dada
 }
 
