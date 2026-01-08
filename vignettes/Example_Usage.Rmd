@@ -21,13 +21,17 @@ library(fatherStay)
 This vignette subject to change, and will likely be out of date very shortly.
 
 ```{r}
-df <- simulate_data()
+df <- simulate_data() |>
+  dplyr::filter(prov == "ON")
 tail(df, 12) # last 10 are NA - to be nowcast!
 ```
 
 ```{r}
-now_simple_models(dad ~ npos, df, model = "lm")
-now_simple_models(dad ~ npos, df, model = "ar", order = 1)
+prepped_data <- prep_data(dad ~ npos, df, model = "lm", date_col = "date")
+print.dadnow(prepped_data)
+
+trained_data <- train_model(prepped_data)
+print(trained_data)
 ```
 
 
