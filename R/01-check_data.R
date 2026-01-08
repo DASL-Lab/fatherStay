@@ -10,8 +10,9 @@
 #' 
 prep_data <- function(
   formula, data, model, date_col = NULL,
-  quiet = FALSE
+  quiet = FALSE, order = 1
 ) {
+  data <- as.data.frame(data)
   # Get the dates
   dates <- data[, date_col]
   if (length(dates) != length(unique(dates))) {
@@ -22,7 +23,7 @@ prep_data <- function(
       parse_date_time(dates, c("ymd", "dmy", "mdy", "mdy")),
       error = function(e) e
     )
-    if (inherits(dates, "error")) stop("Date formats did not parse. Convert to date and try again.")
+    if (inherits(dates, "error")) stop("Date formats did not parse. Please manually convert to 'Date' and try again.")
   }
   if (!quiet) {
     cat(
@@ -38,17 +39,18 @@ prep_data <- function(
     cat("Note: data are not sampled at regular intervals, imputation is required for some models.\n")
   }
 
-  # X and y
-  X <- model.matrix(formula, data)
-  y <- data[, all.vars(formula)[1]]
+  # Training and nowcasting data
+  response <- all.vars(formula)[1]
+  covariates <- all.vars(formula)[-1]
 
-  # Determine the training and nowcasting data
+  y <- data[, response]
   trailing_nas <- find_nas(y)
   num_non_na <- length(y) - trailing_nas
-  X_train <- X[1:num_non_na, ]
-  X_nowcast <- X[(num_non_na + 1):length(X[, 1]), ]
-  y_train <- y[1:num_non_na]
-  y_nowcast <- y[(num_non_na + 1):length(y)]
+
+  X_train <- data[1:num_non_na, covariates]
+  X_nowcast <- data[(num_non_na + 1):nrow(data), covariates]
+  y_train <- data[1:num_non_na, all.vars(formula)[1]]
+  y_nowcast <- data[(num_non_na + 1):nrow(data), all.vars(formula)[1]]
 
   # Create dadnow object
   return_value <- list(

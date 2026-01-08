@@ -19,6 +19,8 @@ train_model <- function(dadnow, quiet = FALSE) {
     )
     dadnow[[paste0("trained_", model)]] <- res
   }
+
+  dadnow
 }
 
 train_lm <- function(X, y) {
