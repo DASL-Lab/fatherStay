@@ -4,6 +4,7 @@
 #' @param quiet If TRUE, suppresses output.
 #'
 #' @returns A dadnow object with the model trained.
+#' @export
 train_model <- function(dadnow, quiet = FALSE) {
   # Check the model is valid
   if (!all(dadnow$model %in% c(

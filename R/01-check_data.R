@@ -7,7 +7,7 @@
 #' @param date_col Name of the column containing date information. If NULL, the date information attempted to be inferred. If there's a single datetime column then it is used. If the data are a ts or mts or zoo object, the dates are esxtracted.
 #' 
 #' @returns Object of class dadnow
-#' 
+#' @export
 prep_data <- function(
   formula, data, model, date_col = NULL,
   quiet = FALSE, order = 1
