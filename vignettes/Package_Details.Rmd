@@ -83,21 +83,19 @@ A natural next step is to model the process as an ARX process, that is as an AR 
 $$
 y_t = a_{t} x_{t} + \sum_{i=1}^n a_{t-i} x_{t-i} + \sum_{j=1}^m b_{t-i} y_{t-i} + \epsilon_t
 $$
+This system can also be expanded to incorporate multiple explanatory variables:
 
-### Dynamic Factor Models
+$$
+y_t = a_{t} x_{t} + \sum_{i=1}^n a_{t-i} x_{t-i} + \sum_{j=1}^m b_{t-i} y_{t-i} + \sum_{i=1}^p c_{t-i} z_{t-i,1} + c_{t} z_{t,1} +  \epsilon_t
+$$
+It would be easier to represent this in a vector form as:
 
-Dynamic Factor Models are used frequently in the calculation of GDP and other economic variables. They make the assumption that our variable of interest depends on a number of explanatory variables that can in turn be modelled by AR models. This is a similar definition to the Kalman Filter, but this model doesn't have the update --> predict cycle and the Kalman gain.
+$$
+y_t = a_{t} x_{t} + \boldsymbol{a}\boldsymbol{x} + \boldsymbol{b}
+\boldsymbol{y} + \boldsymbol{c} \boldsymbol{z_1}  + c_{t} z_{t,1} + \epsilon_t
+$$
 
-In this model we define our process to be some product of a lag matrix $L_1$ and a vector of factors $f_t$ plus a random error.
-$$
-y_t = L_1f_t + \epsilon_t
-$$
-The explanatory variables are dependent of previous iterations of themselves multiplied by a different lag matrix $L_2$, and a random error term.
-$$
-f_t = L_2f_{t-1} + \psi_t
-$$
-The main benefit of a dynamic factor model is that it allows for a dataset with many variables to be analysed more efficiently, but using only the factors and not all of the variables in the dataset. In this case we do not have a large number of factors, and so dynamic factor models may not be the best approach, but is still worth considering and comparing with other methods.
-(https://www.princeton.edu/~mwatson/papers/dfm_oup_4.pdf)
+Where $\boldsymbol{x, \ y, \ z}$ are the past values of those variables, and $\boldsymbol{a, \ b, \ c}$ are the values of the coefficients.
 
 ### Kalman filter/Smoothing
 
