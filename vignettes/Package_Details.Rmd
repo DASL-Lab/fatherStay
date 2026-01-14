@@ -138,7 +138,7 @@ and we can assume an appropriate likelihood for each response. The "$...$" in ea
 
 
 ### Non Linear Models
-In additional all of these relatively simple linear models we will also be considering non-linear models/processes. In this project we are seeking to predict the current values of DAD, not create an explanatory model. This makes many ML models a good option to use since they are focused on creating predictions not on their explanatory power. 
+In additional all the previous linear models we will also be considering non-linear models/processes. In this project we are seeking to predict the current values of DAD, not create an explanatory model. This allows us to use many ML models since they are focused on creating predictions not on the explanatory power of the resulting model. 
 
 The simplest option is to use splines to create a basic spline model of the response (DAD) based on the current values of our explanatory variables:
 $$
@@ -146,9 +146,7 @@ y_t = \sum_{i=0}^n \alpha_i b_i(x_{t}) + \sum_{j=0}^m \beta_j b_j(z_{t,1}) + \su
 $$
 Where $b_i(), \ b_j(), \ b_k()$ are all basis splines. There is room to expand this to include the past values of the explanatory variables.
 
-Random forests are also a good technique for us to use on this project, since they are relatively easy to implement and are a powerful tool, the predictive capabilities can be further enhanced by using techniques like XGboost. 
-
-Random Forests work best when there are many variables for them to select between. In this project, we only have our three main covariates to work with, however the time bound nature of our data allows us to use the lagged values of the covariates as well to enhance the number of variables we are working with.
+Random forests are also a good technique for us to use on this project, since they are relatively easy to implement and are a powerful tool, the predictive capabilities can be further enhanced by using techniques like XGboost. Random Forests work best when there are many variables for them to select between. In this project, we only have our three main covariates to work with, however the time bound nature of our data allows us to use the lagged values of the covariates as well to enhance the number of variables we are working with. The Random Forest model would then be able to predict future values of DAD
 
 Other potential models that we may want to use are simple neural nets, 
 
@@ -173,7 +171,7 @@ y_t = a_{t} x_{t} + \boldsymbol{a}\boldsymbol{x} + \boldsymbol{b}
 \boldsymbol{y} + \boldsymbol{c} \boldsymbol{z_1}  + c_{t} z_{t,1} + \epsilon_t
 $$
 
-Where $\boldsymbol{x, \ y, \ z}$ are the past values of those variables, and $\boldsymbol{a, \ b, \ c}$ are the values of the coefficients.
+Where $\boldsymbol{x, \ y, \ z}$ are the past values of those variables, and $\boldsymbol{a, \ b, \ c}$ are the values of the coefficients. The ARX model is a special case of the ARIMAX model where the integration and moving average parts are both 0, expanding the ARX model to an ARIMAX one is relatively straightforward.
 
 ### Kalman filter/Smoothing
 
