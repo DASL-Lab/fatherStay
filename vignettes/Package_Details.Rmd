@@ -47,7 +47,7 @@ We expect there to be some missing data in the predictor variables. We plan on u
 
 There are several existing R packages that allow for imputation and work in a time series context, and while we do not want the program we are developing to be dependent on many packages it makes sense to use an existing package for the imputation since it is not a focus of the project. 
 
-The package that we will be using in this project is imputeTS, a package in R for imputing univariate time series. It has the advantage of being specifically for time series data. It features a variety of complex methods for imputation such as; Kalman smoothing, and interpolation, as well as simple methods like using the last observation or the mean. While this package does not take advantage of the multivariate nature of our data it is still a good option to impute the missing values in our data.
+The package that we will be using in this project is imputeTS, a package in R for imputing univariate time series. It has the advantage of being specifically for time series data. It features a variety of complex methods for imputation such as; Kalman smoothing, and interpolation, as well as simple methods like using the last observation or the mean (moritzImputeTSTimeSeries2017a). While this package does not take advantage of the multivariate nature of our data it is still a good option to impute the missing values in our data.
 
 ## Nowcasting
 
@@ -92,16 +92,16 @@ There are several different techniques for nowcasting in a time series context, 
 
 The first and simplest models that we will be looking at in this project are linear models where the value of DAD we are nowcasting is dependent on the current values of the explanatory variables:
 $$
-y_t = ax_t + bz_{t,i} + \epsilon_t
+y_t = \alpha x_t + \beta z_{t,i} + \epsilon_t
 $$
 
 We can build on this basic model by adding the complexity of lagging the values of the explanatory variables:
 $$
-y_t = cx_t + dx_{t-1} + \epsilon_t
+y_t = \phi x_t + \rho x_{t-1} + \epsilon_t
 $$
 Building on this complexity is if we take into account previous iterations of $y$, which is effectively a simple AR model of $y$ based on $x$:
 $$
-y_t = ey_{t-1} + fx_{t} + \epsilon_t
+y_t = \gamma y_{t-1} + \psi x_{t} + \epsilon_t
 $$
 
 ### Mechanistic Models
@@ -148,33 +148,34 @@ Where $b_i(), \ b_j(), \ b_k()$ are all basis splines. There is room to expand t
 
 Random forests are also a good technique for us to use on this project, since they are relatively easy to implement and are a powerful tool, the predictive capabilities can be further enhanced by using techniques like XGboost. Random Forests work best when there are many variables for them to select, and find non-linear patterns between. In this project, we only have our three main covariates to work with, however the time bound nature of our data allows us to use the lagged values of the covariates, to enhance the number of variables we are working with. The Random Forest model would then be able to predict future values of DAD based on some combination of the current and lagged values of the explanatory variables.
 
-There are other potential models that we may want to use in this project such as simple neural nets. The models discussed here are the ones we will definitely be using and a good starting point, but throughout the project other useful models will likely come up and we will be using those as well. We are not intending on limiting ourselves to just the models discussed here. 
+There are other potential models that we may want to use in this project such as simple neural nets (richardsonNowcastingGDPUsing2021). The models discussed here are the ones we will definitely be using and a good starting point, but throughout the project other useful models will likely come up and we will be using those as well. We are not intending on limiting ourselves to just the models discussed here. 
 
 The package will also provide an API to allow additional models. The user can specify a function (or functions) that can take in data of a particular format and output predictions in a package-specific format.
 
 ### ARX
 
-A natural next step is to model the process as an ARX process, that is as an AR system that is based on previous values of the variables itself but also dependent on current and past values of some external explanatory variable. We can represent it by the following equations:
+A natural next step is to model the process as an ARX process, that is as an AR system that is based on previous values of the variables itself but also dependent on current and past values of some external explanatory variable. We can represent it by the following equations (picciARXModelingTime2024):
 
 $$
-y_t = a_{t} x_{t} + \sum_{i=1}^n a_{t-i} x_{t-i} + \sum_{j=1}^m b_{t-i} y_{t-i} + \epsilon_t
+y_t = \alpha_{t} x_{t} + \sum_{i=1}^n \alpha_{t-i} x_{t-i} + \sum_{j=1}^m \beta_{t-i} y_{t-i} + \epsilon_t
 $$
 
-Where $a_i$ represents the impacts of the external variables and $b_i$'s are the parameters for the AR model and have the same interpretation of being measures of the impact of previous terms in the sequence. In this case there is also a $a_tx_t$ term included since this is a model for nowcasting and so the current value of the explanatory variable is used.
+Where $\alpha_i$ represents the impacts of the external variables and $\beta_i$'s are the parameters for the AR model and have the same interpretation of being measures of the impact of previous terms in the sequence. In this case there is also a $a_tx_t$ term included since this is a model for nowcasting and so the current value of the explanatory variable is used.
 
 This system can also be expanded to incorporate multiple explanatory variables:
 
 $$
-y_t = a_{t} x_{t} + \sum_{i=1}^n a_{t-i} x_{t-i} + c_{t} z_{t,1} + \sum_{i=1}^p c_{t-i} z_{t-i,1} + \sum_{j=1}^m b_{t-i} y_{t-i} + \epsilon_t
+y_t = \alpha_{t} x_{t} + \sum_{i=1}^n \alpha_{t-i} x_{t-i} + \gamma_{t} z_{t,1} + \sum_{i=1}^p \gamma_{t-i} z_{t-i,1} + \sum_{j=1}^m \beta_{t-i} y_{t-i} + \epsilon_t
 $$
+
 It would be easier to represent this in a vector form as:
 
 $$
-y_t = a_{t} x_{t} + \boldsymbol{a}\boldsymbol{x} + c_{t} z_{t,1} +  \boldsymbol{c} \boldsymbol{z_1} + \boldsymbol{b}
+y_t = \alpha_{t} x_{t} + \boldsymbol{\alpha}\boldsymbol{x} + \gamma_{t} z_{t,1} +  \boldsymbol{\gamma} \boldsymbol{z_1} + \boldsymbol{\beta}
 \boldsymbol{y} + \epsilon_t
 $$
 
-Where $\boldsymbol{x, \ y, \ z}$ are the past values of those variables, and $\boldsymbol{a, \ b, \ c}$ are the values of the coefficients. The ARX model is a special case of the ARIMAX model where the integration and moving average parts are both 0, expanding the ARX model to an ARIMAX one is relatively straightforward.
+Where $\boldsymbol{x, \ y, \ z}$ are the past values of those variables, and $\boldsymbol{\alpha, \ \beta, \ \gamma}$ are the values of the coefficients. The ARX model is a special case of the ARIMAX model where the integration and moving average parts are both 0, expanding the ARX model to an ARIMAX one is relatively straightforward.
 
 ### Kalman filter/Smoothing
 
@@ -182,16 +183,16 @@ A common method in nowcasting time series data is using the Kalman Filter (rossi
 
 A Kalman filter is capable of handling the multivariate nature of this data. The foundational equations that the Kalman filter is based on:
 $$
-y_t = a_tx_t + \epsilon_{1,t} \\
-x_t = b_tx_{t-1} + \epsilon_{2,t}
+y_t = \alpha_tx_t + \epsilon_{1,t} \\
+x_t = \beta_tx_{t-1} + \epsilon_{2,t}
 $$
 
 Can easily be changed to accommodate multiple predictors:
 
 $$
-y_t = a_tx_t + b_tz_t + \epsilon_{1,t} \\
-x_t = c_tx_{t-1} + \epsilon_{2,t} \\
-z_t = d_tz_{t-1} + \epsilon_{3,t}
+y_t = \alpha_tx_t + \beta_tz_t + \epsilon_{1,t} \\
+x_t = \gamma_tx_{t-1} + \epsilon_{2,t} \\
+z_t = \delta_tz_{t-1} + \epsilon_{3,t}
 $$
 
 There are R packages that can be used to run a Kalman Filter such as kalmanfilter these are a good option for us to use since manually coding a Kalman filter would be very complex.
