@@ -5,6 +5,7 @@ vignette: >
   %\VignetteIndexEntry{Package_Details}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: Package_Details.bib
 ---
 
 ```{r, include = FALSE}
@@ -47,7 +48,7 @@ We expect there to be some missing data in the predictor variables. We plan on u
 
 There are several existing R packages that allow for imputation and work in a time series context, and while we do not want the program we are developing to be dependent on many packages it makes sense to use an existing package for the imputation since it is not a focus of the project. 
 
-The package that we will be using in this project is imputeTS, a package in R for imputing univariate time series. It has the advantage of being specifically for time series data. It features a variety of complex methods for imputation such as; Kalman smoothing, and interpolation, as well as simple methods like using the last observation or the mean (moritzImputeTSTimeSeries2017a). While this package does not take advantage of the multivariate nature of our data it is still a good option to impute the missing values in our data.
+The package that we will be using in this project is imputeTS, a package in R for imputing univariate time series. It has the advantage of being specifically for time series data. It features a variety of complex methods for imputation such as; Kalman smoothing, and interpolation, as well as simple methods like using the last observation or the mean [@moritzImputeTSTimeSeries2017]. While this package does not take advantage of the multivariate nature of our data it is still a good option to impute the missing values in our data.
 
 ## Nowcasting
 
@@ -59,7 +60,7 @@ We will be making several key assumptions in this project. The first is that any
 
 Regardless of the model used, the goal of this package is to predict the trailing NA values in the response variable and to provide estimates of the uncertainty of these predictions. Some of the proposed models include uncertainty estimates as part of their machinery (for example, linear models have closed-form prediction intervals), but others require numerical techniques.
 
-A model-agnostic estimate of prediction uncertainty is Ensemble-based Batch Prediction Intervals (EnBPI). Suppose we're doing 5-step ahead prediction with a batch size of 50. We start by randomly sampling a "batch" from our complete data (not including the data to be nowcasted), that is, we take a string of 50 observations as well as the 5 next data points. We fit the model to the 50 observations and we make predictions for the next 5 data points. We record how far away our prediction is from the observed data. We do this many times to build up a data set of 5-step ahead prediction errors. We can look at, say, the 2.5\% and 97.5\% quantiles of these errors to get the width of our prediction interval. When we actually perform the nowcasts on the missing data, we center these intervals on our predictions.
+A model-agnostic estimate of prediction uncertainty is Ensemble-based Batch Prediction Intervals (EnBPI) [@xuConformalPredictionInterval2021]. Suppose we're doing 5-step ahead prediction with a batch size of 50. We start by randomly sampling a "batch" from our complete data (not including the data to be nowcasted), that is, we take a string of 50 observations as well as the 5 next data points. We fit the model to the 50 observations and we make predictions for the next 5 data points. We record how far away our prediction is from the observed data. We do this many times to build up a data set of 5-step ahead prediction errors. We can look at, say, the 2.5\% and 97.5\% quantiles of these errors to get the width of our prediction interval. When we actually perform the nowcasts on the missing data, we center these intervals on our predictions.
 
 Since this approach works for any model (regardless of whether there's a theoretical or closed-form solution for prediction intervals), we will apply this to all models for consistency. The only exception will be for any Bayesian models we might implement, for which we'll use the posterior of the predicted values for all numerical summaries.
 
@@ -148,13 +149,13 @@ Where $b_i(), \ b_j(), \ b_k()$ are all basis splines. There is room to expand t
 
 Random forests are also a good technique for us to use on this project, since they are relatively easy to implement and are a powerful tool, the predictive capabilities can be further enhanced by using techniques like XGboost. Random Forests work best when there are many variables for them to select, and find non-linear patterns between. In this project, we only have our three main covariates to work with, however the time bound nature of our data allows us to use the lagged values of the covariates, to enhance the number of variables we are working with. The Random Forest model would then be able to predict future values of DAD based on some combination of the current and lagged values of the explanatory variables.
 
-There are other potential models that we may want to use in this project such as simple neural nets (richardsonNowcastingGDPUsing2021). The models discussed here are the ones we will definitely be using and a good starting point, but throughout the project other useful models will likely come up and we will be using those as well. We are not intending on limiting ourselves to just the models discussed here. 
+There are other potential models that we may want to use in this project such as simple neural nets [@richardsonNowcastingGDPUsing2019]. The models discussed here are the ones we will definitely be using and a good starting point, but throughout the project other useful models will likely come up and we will be using those as well. We are not intending on limiting ourselves to just the models discussed here. 
 
 The package will also provide an API to allow additional models. The user can specify a function (or functions) that can take in data of a particular format and output predictions in a package-specific format.
 
 ### ARX
 
-A natural next step is to model the process as an ARX process, that is as an AR system that is based on previous values of the variables itself but also dependent on current and past values of some external explanatory variable. We can represent it by the following equations (picciARXModelingTime2024):
+A natural next step is to model the process as an ARX process, that is as an AR system that is based on previous values of the variables itself but also dependent on current and past values of some external explanatory variable. We can represent it by the following equations [@picciARXModelingTime2024]:
 
 $$
 y_t = \alpha_{t} x_{t} + \sum_{i=1}^n \alpha_{t-i} x_{t-i} + \sum_{j=1}^m \beta_{t-i} y_{t-i} + \epsilon_t
@@ -179,7 +180,7 @@ Where $\boldsymbol{x, \ y, \ z}$ are the past values of those variables, and $\b
 
 ### Kalman filter/Smoothing
 
-A common method in nowcasting time series data is using the Kalman Filter (rossiKalmanFilteringBased2015). The Kalman filter predicts one step ahead and its algorithm works in two steps, first creating a prediction, and then after the actual data is observed, updating that prediction using the Kalman gain. This preserves the overall trend of the data, while also taking the actual values into account. The applications of this to nowcasting are that we would use the prediction step to nowcast the desired value (DAD) and then the prediction step would update the algorithm when more data is observed.
+A common method in nowcasting time series data is using the Kalman Filter [@rossiKalmanFilteringBased2015]. The Kalman filter predicts one step ahead and its algorithm works in two steps, first creating a prediction, and then after the actual data is observed, updating that prediction using the Kalman gain. This preserves the overall trend of the data, while also taking the actual values into account. The applications of this to nowcasting are that we would use the prediction step to nowcast the desired value (DAD) and then the prediction step would update the algorithm when more data is observed.
 
 A Kalman filter is capable of handling the multivariate nature of this data. The foundational equations that the Kalman filter is based on:
 $$
@@ -196,3 +197,5 @@ z_t = \delta_tz_{t-1} + \epsilon_{3,t}
 $$
 
 There are R packages that can be used to run a Kalman Filter such as kalmanfilter these are a good option for us to use since manually coding a Kalman filter would be very complex.
+
+# References

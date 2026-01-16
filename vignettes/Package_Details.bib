@@ -1,0 +1,75 @@
+@article{moritzImputeTSTimeSeries2017,
+  title = {{{imputeTS}}: {{Time Series Missing Value Imputation}} in {{R}}},
+  shorttitle = {{{imputeTS}}},
+  author = {Moritz, Steffen and {Bartz-Beielstein}, Thomas},
+  year = 2017,
+  month = may,
+  journal = {The R Journal},
+  volume = {9},
+  number = {1},
+  pages = {207--218},
+  issn = {2073-4859},
+  doi = {10.32614/RJ-2017-009},
+  urldate = {2026-01-16},
+  abstract = {The *imputeTS* package specializes on univariate time series imputation. It offers multiple state-of-the-art imputation algorithm implementations along with plotting functions for time series missing data statistics. While imputation in general is a well-known problem and widely covered by R packages, finding packages able to fill missing values in univariate time series is more complicated. The reason for this lies in the fact, that most imputation algorithms rely on inter-attribute correlations, while univariate time series imputation instead needs to employ time dependencies. This paper provides an introduction to the *imputeTS* package and its provided algorithms and tools. Furthermore, it gives a short overview about univariate time series imputation in R.}
+}
+
+@incollection{picciARXModelingTime2024,
+  title = {{{ARX Modeling}} of {{Time Series}}},
+  booktitle = {An {{Introduction}} to {{Statistical Data Science}}},
+  author = {Picci, Giorgio},
+  year = 2024,
+  pages = {345--383},
+  publisher = {Springer Books},
+  urldate = {2026-01-16},
+  abstract = {In this chapter we shall address the estimation of linear statistical models involving time, where the data of the inference problems are sequences of observations indexed by time. Due to errors and various causes of uncertainty these data are random and It is therefore reasonable to model them as trajectories of a stochastic process. The scope of the statistical exercise is to discover a stochastic mathematical model of the underlying physical or economic dynamical system for the purpose of prediction and control. We only concentrate on estimation of (stationary) ARX models since more general structures like ARMAX or ARIMAX lead to nonlinear estimation and unique convergence of the algorithms is not guaranteed. Moreover the analysis of these systems requires tools which we do not assume available to the students of this course.},
+  langid = {english},
+  file = {/Users/dbecker/Zotero/storage/EUVMVGII/978-3-031-66619-3_9.html}
+}
+
+@article{richardsonNowcastingGDPUsing2019,
+  title = {Nowcasting {{GDP}} Using Machine Learning Algorithms: {{A}} Real-Time Assessment},
+  shorttitle = {Nowcasting {{GDP}} Using Machine Learning Algorithms},
+  author = {Richardson, Adam and Mulder, Thomas van Florenstein and Vehbi, Tugrul},
+  year = 2019,
+  month = nov,
+  journal = {Reserve Bank of New Zealand Discussion Paper Series},
+  number = {DP2019/03},
+  publisher = {Reserve Bank of New Zealand},
+  urldate = {2026-01-16},
+  abstract = {Can machine-learning algorithms help central banks understand the current state of the economy? Our results say yes! We contribute to the emerging literature on forecasting macroeconomic variables using machine-learning algorithms by testing the `nowcast' performance of common algorithms in a full `real time' setting. That is, with real-time vintages of New Zealand GDP growth (our target variable) and real-time vintages of around 600 predictors. Our results show machine-learning algorithms are able to significantly improve over standard models used in economics to nowcast macroeconomic variables. We also show machine-learning algorithms have the potential to improve the official forecasts of the Reserve Bank of New Zealand.},
+  langid = {english},
+  file = {/Users/dbecker/Zotero/storage/2R9XE79N/2019-3.html}
+}
+
+@article{rossiKalmanFilteringBased2015,
+  title = {Kalman {{Filtering}}--{{Based Probabilistic Nowcasting}} of {{Object-Oriented Tracked Convective Storms}}},
+  author = {Rossi, Pekka J. and Chandrasekar, V. and Hasu, Vesa and Moisseev, Dmitri},
+  year = 2015,
+  month = mar,
+  journal = {Journal of Atmospheric and Oceanic Technology},
+  volume = {32},
+  number = {3},
+  pages = {461--477},
+  issn = {0739-0572, 1520-0426},
+  doi = {10.1175/JTECH-D-14-00184.1},
+  urldate = {2026-01-16},
+  abstract = {Abstract             The weather radar--based object-oriented convective storm tracking is a standard approach for analyzing and nowcasting convective storms. However, the majority of current storm-tracking algorithms provide nowcasts only in a deterministic fashion with limited ability to estimate the related uncertainties.             This paper proposes a method for probabilistic nowcasting of convective storms that addresses the issue of uncertainty of nowcasts. The approach first utilizes a two-dimensional radar-based storm identification and tracking algorithm in conjunction with the Kalman filtering of noisy measurements of storm centroid with the continuous white noise acceleration model. The resulting smoothed estimates of storm centroid and velocity components and their error covariance values are then applied to nowcast the probability of storm occurrence.             To verify the approach, 20--60-min nowcasts were computed every 5 min using composite weather radar data in Finland including approximately 22 000 tracked storms. The verification shows that the algorithm is applicable in both deterministic and probabilistic manner. Moreover, the forecast probabilities are consistent with observed frequencies of the storms, especially with 20- and 30-min nowcasts. The accuracy of the probabilistic nowcasts was evaluated through the Brier skill score with respect to the deterministic nowcasts and nowcasts based on observation persistence and sample climatology. The results show that the proposed nowcasting method has an improved accuracy over all of the reference forecast types.},
+  langid = {english},
+  file = {/Users/dbecker/Zotero/storage/9FT86LZQ/Rossi et al. - 2015 - Kalman Filtering–Based Probabilistic Nowcasting of Object-Oriented Tracked Convective Storms.pdf}
+}
+
+@inproceedings{xuConformalPredictionInterval2021,
+  title = {Conformal Prediction Interval for Dynamic Time-Series},
+  booktitle = {Proceedings of the 38th {{International Conference}} on {{Machine Learning}}},
+  author = {Xu, Chen and Xie, Yao},
+  year = 2021,
+  month = jul,
+  pages = {11559--11569},
+  publisher = {PMLR},
+  issn = {2640-3498},
+  urldate = {2026-01-16},
+  abstract = {We develop a method to construct distribution-free prediction intervals for dynamic time-series, called \textbackslash Verb\textbar EnbPI\textbar{} that wraps around any bootstrap ensemble estimator to construct sequential prediction intervals. \textbackslash Verb\textbar EnbPI\textbar{} is closely related to the conformal prediction (CP) framework but does not require data exchangeability. Theoretically, these intervals attain finite-sample, \textbackslash textit\textbraceleft approximately valid\textbraceright{} marginal coverage for broad classes of regression functions and time-series with strongly mixing stochastic errors. Computationally, \textbackslash Verb\textbar EnbPI\textbar{} avoids overfitting and requires neither data-splitting nor training multiple ensemble estimators; it efficiently aggregates bootstrap estimators that have been trained. In general, \textbackslash Verb\textbar EnbPI\textbar{} is easy to implement, scalable to producing arbitrarily many prediction intervals sequentially, and well-suited to a wide range of regression functions. We perform extensive real-data analyses to demonstrate its effectiveness.},
+  langid = {english},
+  file = {/Users/dbecker/Zotero/storage/IPJEJ5QM/Xu and Xie - Conformal Prediction Interval for Dynamic Time-Series.pdf}
+}
