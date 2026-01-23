@@ -10,15 +10,11 @@ print.dadnow <- function(dadnow) {
   cat("Date column:", dadnow$date_col, "\n")
   cat("AR Order:", dadnow$order, "\n")
   cat("Require imputation:", dadnow$require_imputation, "\n")
-  cat(
-    ifelse(all(is.na(dadnow$y_nowcast)),
-      "Nowcasting has not been performed.\n",
-      "Nowcasting has been performed.\n"
-    )
-  )
+  
   trained_models <- names(dadnow)[grepl("trained_", names(dadnow))]
   if (length(trained_models) == 0) trained_models <- "None"
   cat("Trained models:", gsub("trained_", "", trained_models), "\n")
+
   invisible(dadnow)
 }
 

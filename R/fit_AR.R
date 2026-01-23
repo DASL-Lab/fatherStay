@@ -23,5 +23,5 @@ fit_AR <- function(Y_train, X_train = NULL, X_nowcast = NULL, p = 1, n.ahead = 1
 
   predictions <- predict(AR_mod, n, X_nowcast)
 
-  list(model = AR_mod, prediction = predictions)
+  list(model = AR_mod, prediction = predictions$pred)
 }
