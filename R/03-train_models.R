@@ -15,10 +15,12 @@ train_model <- function(dadnow, quiet = FALSE) {
 
   for (model in dadnow$model) {
     res <- switch(model,
-      "lm" = train_lm(as.matrix(dadnow$X_train), dadnow$y_train),
-      "ar" = train_ar(dadnow$X_train, dadnow$y_train, dadnow$order)
+      "lm" = fit_LM(X_train = as.matrix(dadnow$X_train), Y_train = dadnow$y_train, X_nowcast = dadnow$X_nowcast),
+      "ar" = fit_ARX(X_train = as.matrix(dadnow$X_train), Y_train = dadnow$y_train, X_nowcast = dadnow$X_nowcast, p = dadnow$order)
     )
-    dadnow[[paste0("trained_", model)]] <- res
+    dadnow[[paste0("trained_", model)]] <- res$model
+    dadnow[[paste0("nowcast_", model)]] <- res$prediction
+    # TODO: Standard errors / prediction intervals
   }
 
   dadnow
