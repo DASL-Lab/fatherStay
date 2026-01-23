@@ -1,0 +1,13 @@
+test_that("fit ARX model works", {
+  testY <- c(1.838, 0.382, -0.306, 2.185, 0.458, -2.366, -0.959, -1.014, -0.158, -2.133)
+  X_train <- seq(1,10)
+  X_nowcast <- data.frame(c(1,2,3))
+  test_mod <- fit_ARX(testY, X_train = X_train, X_nowcast = X_nowcast, p = 2)
+  expect_equal(test_mod[[1]]$coef[[1]], -0.1798, tolerance = 0.001)
+  expect_equal(test_mod[[1]]$coef[[2]], -0.6169, tolerance = 0.001)
+  expect_equal(test_mod[[1]]$coef[[3]], 1.6715, tolerance = 0.001)
+  expect_equal(test_mod[[1]]$coef[[4]], -0.3475, tolerance = 0.001)
+  expect_equal(test_mod[[2]][[1]][1], 0.5827, tolerance = 0.001)
+  expect_equal(test_mod[[2]][[1]][2], 1.3132, tolerance = 0.001)
+  expect_equal(test_mod[[2]][[1]][3], 1.0258, tolerance = 0.001)
+})
