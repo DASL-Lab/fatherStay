@@ -9,7 +9,7 @@
 #' @returns Linear model object and predictions
 #' @export
 
-fit_AR <- function(Y_train, X_train = NULL, X_nowcast = NULL, p = 1, n.ahead = 1) {
+fit_AR <- function(Y_train, X_train = NULL, X_nowcast = NULL, p = 1,d = 0, q = 0, n.ahead = 1) {
   if (n.ahead >= nrow(data.frame(X_nowcast))) {
     n <- n.ahead
   } else {
@@ -19,7 +19,7 @@ fit_AR <- function(Y_train, X_train = NULL, X_nowcast = NULL, p = 1, n.ahead = 1
   # If the X_train and X_nowcast are NULL, then passing them into the ARIMA
   #  function doesn't effect it at all, allowing us to use the same function for
   #  AR and ARX models!
-  AR_mod <- arima(Y_train, order = c(p, 0, 0), xreg = X_train)
+  AR_mod <- arima(Y_train, order = c(p, d, q), xreg = X_train)
 
   predictions <- predict(AR_mod, n, X_nowcast)
 
