@@ -5,13 +5,14 @@
 #' @param X_Nowcast Data to make predictions bases on
 #' @param family Model family, as used in `mgcv::gam()`. Defaults to `gaussian` and accepts any family that is accepted by `mgcv::gam()`.
 #' @param smooths Named list of smoothing parameters for each variable, e.g. `list("x1" = 10, "x2")` will result in a formula `s(x1, bs = "tp", k = 10) + s(x2, bs = "tp", k = -1) + ...`. If a smoothing parameter is not specified, it will default to -1, which will result `mgcv::gam()` choosing the smoothing parameter.
+#' @param bs Basis smoothing function, as used in `mgcv::gam()`. Default `tp`.
 #'
 #' @returns GAM model object and predictions
 #' @export
 
 fit_GAM <- function(
   Y_train, X_train = NULL, X_nowcast = NULL,
-  family = gaussian, smooths = list()
+  family = gaussian, smooths = list(), bs = "tp"
 ) {
   full_data <- as.data.frame(cbind(Y_train, X_train))
 
@@ -23,7 +24,7 @@ fit_GAM <- function(
       }
       if (is.null(smooths[[smooth]])) smooths[[smooth]] <- -1
       formula_term <- paste0(
-        "s(", smooth, ", bs = 'tp', k = ", smooths[[smooth]], ")"
+        "s(", smooth, ", bs = '", bs, "', k = ", smooths[[smooth]], ")"
       )
       formula_terms[[smooth]] <- formula_term
 
