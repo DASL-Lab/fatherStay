@@ -21,6 +21,12 @@ fit_RF <- function(Y_train, X_train = NULL, X_nowcast = NULL, ntree = 500,
                    weights = NULL,
                    replace = TRUE,
                    maxnodes = NULL) {
+  
+  if (!requireNamespace("randomForest", quietly = TRUE)) {
+    paste("Package \"randomForest\" must be installed to use this function.")
+    return(list(model = NULL, prediction = NULL))
+  }
+  
   Y_train <- data.frame(Y_train)
   X_train <- data.frame(X_train)
 
