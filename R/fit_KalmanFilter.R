@@ -34,7 +34,7 @@ fit_KalmanFilter <- function(Y_train, X_train = NULL, X_nowcast = NULL,
   # fitting the model
   # for some reason using KFAS::SSMtrend() and KFAS::SSMregression() makes this break
   SSMtrend <- KFAS::SSMtrend
-  SSM_Regression <- KFAS::SSMregression
+  SSMregression <- KFAS::SSMregression
   SMod <- KFAS::SSModel(Y_train ~ SSMtrend(degree = 1,  Q = list(matrix(NA))) 
                         + SSMregression(~ x1 + x2, data = data))
   
