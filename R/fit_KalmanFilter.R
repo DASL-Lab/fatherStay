@@ -10,7 +10,7 @@
 #' @export
 
 fit_KalmanFilter <- function(Y_train, X_train = NULL, X_nowcast = NULL,
-                             degree = 1, CovMatrix = NULL) {
+                             degree = 1) {
   
   if (!requireNamespace("KFAS", quietly = TRUE)) {
     paste("Package \"KFAS\" must be installed to use this function.")
@@ -36,12 +36,20 @@ fit_KalmanFilter <- function(Y_train, X_train = NULL, X_nowcast = NULL,
   SSMtrend <- KFAS::SSMtrend
   SSMregression <- KFAS::SSMregression
   SMod <- KFAS::SSModel(Y_train ~ SSMtrend(degree = 1,  Q = list(matrix(NA))) 
-                        + SSMregression(~ x1 + x2, data = data))
+                        + SSMregression(formulaToUse, data = data))
   
   # this finds the estimates for the unknown parameters
-  FitMod <- KFAS::fitSSM(SMod, inits = c(1,1,1), method = "BFGS")$model
+  fitMod <- KFAS::fitSSM(SMod, inits = c(1,1,1), method = "BFGS")$model
   
-  prediction <- predict(FitMod, interval = "prediction", level = 0.9)
+  # new data wrangling!
+  newn <- length(X_nowcast[,1])
+  
+  newY <- rep(NA, newn)
+  
+  # create a new SMod object for the new data
+  newMod <- KFAS::SSModel(newY ~ SMregression(formulaToUse, Q = fitMod$Q), H = fitMod$H)
+  
+  prediction <- predict(FitMod, newdata = newMod)
   
   list(model = FitMod, prediction = prediction)
 }
