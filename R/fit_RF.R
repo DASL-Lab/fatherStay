@@ -21,7 +21,8 @@ fit_RF <- function(Y_train, X_train = NULL, X_nowcast = NULL, ntree = 500,
                    weights = NULL,
                    replace = TRUE,
                    maxnodes = NULL) {
-  
+  print(mtry)
+  print(ncol(X_train))
   if (!requireNamespace("randomForest", quietly = TRUE)) {
     paste("Package \"randomForest\" must be installed to use this function.")
     return(list(model = NULL, prediction = NULL))
@@ -31,7 +32,7 @@ fit_RF <- function(Y_train, X_train = NULL, X_nowcast = NULL, ntree = 500,
   X_train <- data.frame(X_train)
 
   formulaToUse <- paste0(colnames(Y_train), "~")
-  for (i in seq(length(ncol(X_train)))) {
+  for (i in seq_len(ncol(X_train))) {
     formulaToUse <- paste0(formulaToUse, colnames(X_train)[i], "+")
   }
   formulaToUse <- substr(formulaToUse, 1, (nchar(formulaToUse) - 1))
@@ -41,7 +42,8 @@ fit_RF <- function(Y_train, X_train = NULL, X_nowcast = NULL, ntree = 500,
 
   RFModel <- randomForest::randomForest(formulaToUse,
     data = data, ntree = ntree, mtry = mtry, weights = weights,
-    replace = replace, maxnodes = maxnodes
+    replace = replace, maxnodes = maxnodes,
+    na.action = na.omit
   )
 
   predictions <- predict(RFModel, newdata = X_nowcast)
