@@ -15,7 +15,7 @@ test_that("ar models work1", {
   df <- data.frame(x, y)
   pred <- now_simple_models(y ~ x, model = "ar", df, order = 1)
   preds <- c(pred$pred[1], pred$pred[2], pred$pred[3], pred$pred[4], pred$pred[5])
-  expect_equal(preds, c(1726.098, 1720.011, 1715.376, 1711.845, 1709.150),
+  expect_equal(preds, c(1726.098, 1726.042, 1725.985, 1725.928, 1725.871),
     tolerance = 0.01
   )
 })

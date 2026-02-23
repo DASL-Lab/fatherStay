@@ -10,11 +10,17 @@
 #' @export
 
 fit_KalmanFilter <- function(Y_train, X_train = NULL, X_nowcast = NULL,
-                             degree = 1) {
+                             params = list(degree = 1)) {
   
   if (!requireNamespace("KFAS", quietly = TRUE)) {
     paste("Package \"KFAS\" must be installed to use this function.")
     return(list(model = NULL, prediction = NULL))
+  }
+  
+  if (is.null(params$degree)) {
+    degree <- 1
+  } else {
+    degree <- params$degree
   }
   
   # to ensure the data is in a consistent format

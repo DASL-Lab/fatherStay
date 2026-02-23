@@ -9,11 +9,33 @@
 #' @returns Linear model object and predictions
 #' @export
 
-fit_AR <- function(Y_train, X_train = NULL, X_nowcast = NULL, p = 1, d = 0, q = 0, n.ahead = 1) {
-  if (n.ahead >= nrow(data.frame(X_nowcast))) {
-    n <- n.ahead
-  } else {
+fit_AR <- function(Y_train, X_train = NULL, X_nowcast = NULL, params = list(p = 1, d = 0, q = 0, n.ahead = 1)) {
+  if (is.null(params$n.ahead)) {
     n <- nrow(data.frame(X_nowcast))
+  } else {
+    if (params$n.ahead >= nrow(data.frame(X_nowcast))) {
+      n <- params$n.ahead
+    } else {
+      n <- nrow(data.frame(X_nowcast))
+    }
+  }
+  
+  if (is.null(params$p)) {
+    p <- 0
+  } else {
+    p <- params$p
+  }
+  
+  if (is.null(params$d)) {
+    d <- 0
+  } else {
+    d <- params$d
+  }
+  
+  if (is.null(params$q)) {
+    q <- 0
+  } else {
+    q <- params$p
   }
 
   # If the X_train and X_nowcast are NULL, then passing them into the ARIMA

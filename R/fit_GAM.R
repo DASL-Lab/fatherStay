@@ -12,10 +12,28 @@
 
 fit_GAM <- function(
   Y_train, X_train = NULL, X_nowcast = NULL,
-  family = gaussian, smooths = list(), bs = "tp"
+  params = list(family = gaussian, smooths = list(), bs = "tp")
 ) {
   full_data <- as.data.frame(cbind(Y_train, X_train))
 
+  if (is.null(params$family)) {
+    family <- gaussian
+  } else {
+    family <- params$family
+  }
+  
+  if (is.null(params$smooths)) {
+    smooths <- list()
+  } else {
+    smooths <- params$smooths
+  }
+  
+  if (is.null(params$bs)) {
+    bs <- "tp"
+  } else {
+    bs <- params$bs
+  }
+  
   if (length(smooths) > 0) {
     formula_terms <- vector(mode = "list", length = length(smooths))
     for (smooth in names(smooths)) {

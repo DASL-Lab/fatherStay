@@ -10,6 +10,6 @@
 #' @returns ARIMA model object and predictions
 #' @export
 
-fit_ARIMA <- function(Y_train, X_train = NULL, X_nowcast = NULL, p = 1, d = 0, q = 1) {
-  fit_AR(Y_train, X_train, X_nowcast, p,d,q)
+fit_ARIMA <- function(Y_train, X_train = NULL, X_nowcast = NULL, params = list(p = 1, d = 0, q = 1)) {
+  fit_AR(Y_train, X_train, X_nowcast, params)
 }

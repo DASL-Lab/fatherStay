@@ -12,21 +12,13 @@
 #' @returns Random Forest object and predictions
 #' @export
 
-fit_RF <- function(Y_train, X_train = NULL, X_nowcast = NULL, ntree = 500,
-                   mtry = if (!is.null(Y_train) && !is.factor(Y_train)) {
-                     max(floor(ncol(X_train) / 3), 1)
-                   } else {
-                     floor(sqrt(ncol(X_train)))
-                   },
-                   weights = NULL,
-                   replace = TRUE,
-                   maxnodes = NULL) {
-  
+fit_RF <- function(Y_train, X_train = NULL, X_nowcast = NULL,
+                   params = list(ntree = 500, mtry = NULL, weights = NULL, replace = TRUE, maxnodes = NULL)) {
   if (!requireNamespace("randomForest", quietly = TRUE)) {
     paste("Package \"randomForest\" must be installed to use this function.")
     return(list(model = NULL, prediction = NULL))
   }
-  
+
   Y_train <- data.frame(Y_train)
   X_train <- data.frame(X_train)
 
@@ -38,6 +30,40 @@ fit_RF <- function(Y_train, X_train = NULL, X_nowcast = NULL, ntree = 500,
   formulaToUse <- as.formula(formulaToUse)
 
   data <- data.frame(X_train, Y_train)
+
+  if (is.null(params$ntree)) {
+    ntree <- 500
+  } else {
+    ntree <- params$ntree
+  }
+
+  if (is.null(params$mtry)) {
+    mtry <- if(!is.null(Y_train) && !is.factor(Y_train)) {
+      max(floor(ncol(X_train) / 3), 1)
+    } else {
+      floor(sqrt(ncol(X_train)))
+    }
+  } else {
+    mtry <- params$mtry
+  }
+
+  if (is.null(params$weights)) {
+    weights <- NULL
+  } else {
+    weights <- params$weights
+  }
+
+  if (is.null(params$replace)) {
+    replace <- TRUE
+  } else {
+    replace <- params$replace
+  }
+
+  if (is.null(params$maxnodes)) {
+    maxnodes <- NULL
+  } else {
+    maxnodes <- params$maxnodes
+  }
 
   RFModel <- randomForest::randomForest(formulaToUse,
     data = data, ntree = ntree, mtry = mtry, weights = weights,
