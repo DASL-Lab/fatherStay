@@ -14,13 +14,11 @@
 nowcast_one <- function(
     formula, data, model, test_size = 0.1, params = NULL, date_col = NULL
   ) {
-  
+
   prepped_data <- prep_data(
     formula, data, model, test_size, date_col = date_col
   )
 
-  params <- check_params(params, model)
-  
   model_id <- make_model_id(model, params)
 
   x_train <- prepped_data$X_train
@@ -40,11 +38,10 @@ nowcast_one <- function(
   )
 
   # Fit to all training, create nowcast
-  nowcast <- dispatch_model(
-    model = model, 
-    x_train = rbind(x_train, x_test),
-    y_train = c(y_train, y_test),
-    x_nowcast = x_now,
+  nowcast <- dispatch_model(model)(
+    X_train = rbind(x_train, x_test),
+    Y_train = c(y_train, y_test),
+    X_nowcast = x_now,
     params = params
   )
   nowcast$params <- params
@@ -55,10 +52,12 @@ nowcast_one <- function(
 }
 
 fit_model_test <- function(model, params, x_train, y_train, x_test, y_test) {
-  
+
   model_id <- make_model_id(model, params)
-  
-  test_preds <- dispatch_model(model, x_train, y_train, x_test, params)
+
+  test_preds <- dispatch_model(model)(
+    X_train = x_train, Y_train = y_train, X_nowcast = x_test, params = params
+  )
   eval <- data.frame(
     "rmse" = sqrt(mean((y_test - test_preds$prediction)^2)),
     "mae" = mean(abs(y_test - test_preds$prediction)),
@@ -69,82 +68,21 @@ fit_model_test <- function(model, params, x_train, y_train, x_test, y_test) {
 }
 
 make_model_id <- function(model, params) {
-  model_id <- paste0("nowcast_", model, "_",
+  model_id <- paste0("nowcast_", as.character(substitute(model)), "_",
     paste0(names(params), params, collapse = "_")
   )
   gsub("_$", "", model_id)
 }
 
-check_params <- function(params, model, verbose = TRUE) {
-  msg <- function(...) if (verbose) cat(...)
-
-  expected_params <- switch(model,
-    "lm" = list(),
-    "ar" = list(order = 1),
-    "arx" = list(order = 1),
-    "gam" = list(smooths = NULL),
-    "rf" = list(ntree = 500, mtry = floor(sqrt(ncol(X_train))))
-  )
-  if (model == "lm") {
-    return(NULL)
-  }
-  if (is.null(params)) {
-    msg("No parameters specified, but parameters are required for this model.\n")
-    params <- set_default_params(expected_params, model, verbose = verbose)
-  }
-  if (!is.list(params)) {
-    msg("'params' must be a list.\n")
-    params <- set_default_params(expected_params, model, verbose = verbose)
-  }
-  if (!all(names(params) %in% names(expected_params))) {
-    missing_params <- setdiff(names(expected_params), names(params))
-    msg("Invalid parameters specified: ", paste0(missing_params, collapse = ", "), "\n")
-    params <- set_default_params(expected_params, model, verbose = verbose)
-  }
-
-  return(params)
-}
-
-set_default_params <- function(params, model, verbose = TRUE) {
-  if (verbose) {
-    cat(
-      paste0(
-        "Setting default parameters ",
-        paste0(names(params), " = ", paste0(params)),
-        "\n"
-      )
-    )
-  }
-  params
-}
-
 dispatch_model <- function(model, x_train, y_train, x_nowcast, params) {
-  if (!model %in% c("lm", "ar", "arx", "arima", "gam", "kf", "rf")) {
-    stop("Invalid model.")
-  }
   switch(model,
-    "lm" = fit_LM(X_train = x_train,
-      Y_train = y_train,
-      X_nowcast = x_nowcast),
-    "ar" = fit_AR(X_train = x_train,
-      Y_train = y_train,
-      X_nowcast = x_nowcast, p = params$order),
-    "arx" = fit_ARX(X_train = x_train,
-      Y_train = y_train,
-      X_nowcast = x_nowcast, p = params$order),
-    "arima" = fit_ARIMA(X_train = x_train,
-      Y_train = y_train,
-      X_nowcast = x_nowcast, p = params$order),
-    "gam" = fit_GAM(X_train = x_train,
-      Y_train = y_train,
-      X_nowcast = x_nowcast, smooths = params$smooths),
-    "kf" = fit_KalmanFilter(X_train = x_train,
-      Y_train = y_train,
-      X_nowcast = x_nowcast,
-      degree = params$degree),
-    "rf" = fit_RF(X_train = x_train,
-      Y_train = y_train,
-      X_nowcast = x_nowcast,
-      mtry = params$mtry, ntree = params$ntree)
+    "lm" = fit_LM,
+    "ar" = fit_AR,
+    "arx" = fit_ARX,
+    "arima" = fit_ARIMA,
+    "gam" = fit_GAM,
+    "kf" = fit_KalmanFilter,
+    "rf" = fit_RF,
+    model
   )
 }

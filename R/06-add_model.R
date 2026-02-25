@@ -17,10 +17,11 @@ add_model <- function(dadnow, model, params = NULL) {
   )
   dadnow$eval <- rbind(dadnow$eval, new_eval)
 
-  new_preds <- dispatch_model(model, 
-    rbind(dadnow$X_train, dadnow$X_test), c(dadnow$y_train, dadnow$y_test),
-    dadnow$X_nowcast,
-    params
+  new_preds <- dispatch_model(model)(
+    X_train = rbind(dadnow$X_train, dadnow$X_test),
+    Y_train = c(dadnow$y_train, dadnow$y_test),
+    X_nowcast = dadnow$X_nowcast,
+    params = params
   )
   dadnow[[paste0("nowcast_", model)]] <- new_preds
 
