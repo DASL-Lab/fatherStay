@@ -46,7 +46,15 @@ fit_RF <- function(Y_train, X_train = NULL, X_nowcast = NULL,
   } else {
     mtry <- params$mtry
   }
-
+  
+  if (is.null(mtry)) {
+    mtry <- if(!is.null(Y_train) && !is.factor(Y_train)) {
+      max(floor(ncol(X_train) / 3), 1)
+    } else {
+      floor(sqrt(ncol(X_train)))
+    }
+  }
+  
   if (!"weights" %in% names(params)) {
     weights <- NULL
   } else {
