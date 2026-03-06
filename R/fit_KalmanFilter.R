@@ -13,7 +13,7 @@ fit_KalmanFilter <- function(Y_train, X_train = NULL, X_nowcast = NULL,
                              params = list(degree = 1)) {
   
   if (!requireNamespace("KFAS", quietly = TRUE)) {
-    paste("Package \"KFAS\" must be installed to use this function.")
+    warning("Package \"KFAS\" must be installed to use this function.")
     return(list(model = NULL, prediction = NULL))
   }
   
