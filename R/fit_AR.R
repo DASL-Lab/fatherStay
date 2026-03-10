@@ -35,7 +35,7 @@ fit_AR <- function(Y_train, X_train = NULL, X_nowcast = NULL, params = list(p = 
   if (!"q" %in% names(params)) {
     q <- 0
   } else {
-    q <- params$p
+    q <- params$q
   }
 
   # If the X_train and X_nowcast are NULL, then passing them into the ARIMA
