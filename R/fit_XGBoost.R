@@ -9,7 +9,7 @@
 #' @export
 
 fit_XGBoost <- function(Y_train, X_train = NULL, X_nowcast = NULL,
-                   params = list(nrounds = 1000, evals = list(), 
+                   params = list(nrounds = 100, evals = list(), 
                                  objective = NULL, verbose = 1,
                                  XGBparams = list())) {
   
@@ -23,7 +23,7 @@ fit_XGBoost <- function(Y_train, X_train = NULL, X_nowcast = NULL,
   dMatrixTrain <- xgboost::xgb.DMatrix(X_train, label = as.matrix(Y_train))
   
   if (!"nrounds" %in% names(params)) {
-    nrounds <- 1000
+    nrounds <- 100
   } else {
     nrounds <- params$nrounds
   }
@@ -51,11 +51,19 @@ fit_XGBoost <- function(Y_train, X_train = NULL, X_nowcast = NULL,
   } else {
     xgbParams2 <- params$XGBparams
   }
+
+  # internal cross validation to tune the nrounds of the model
+  XGBCV <- xgboost::xgb.cv(params = xgbParams2, data = dMatrixTrain, nrounds = nrounds, nfold = 5, verbose = 0)
+    
+  nrounds2 <- which(XGBCV$evaluation_log$test_rmse_mean == min(XGBCV$evaluation_log$test_rmse_mean))
   
+  print(nrounds2)
+  # traing the model
   XGBModel <- xgboost::xgb.train(
-    data = dMatrixTrain, params = xgbParams2, nrounds = nrounds, evals = evals, 
+    data = dMatrixTrain, params = xgbParams2, nrounds = nrounds2, evals = evals, 
     objective = objective, verbose = verbose)
   
+  # create the nowcasting data in the proper form
   yNow <- as.matrix(rep(NA,length(data.frame(X_nowcast)[,1])))
   
   X_nowcast <- as.matrix(X_nowcast)
