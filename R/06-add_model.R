@@ -90,7 +90,7 @@ add_model.multidadnow <- function(multidadnow, formula = NULL, model, params = N
   
   if (is.null(formula)) {
     formula <- multidadnow$models[[1]]$formula
-    message(paste0("Using formula from first registered model: ", formula))
+    message(paste0("Using formula from first registered model: ", deparse(formula), "\n"))
   }
   
   prepped_data <- prep_data(

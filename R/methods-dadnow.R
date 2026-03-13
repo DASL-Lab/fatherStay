@@ -7,9 +7,9 @@
 print.dadnow <- function(dadnow) {
   cat("Date column:", dadnow$date_col, "\n")
   cat(
-    "Date range:",
-    format(min(lubridate::ymd(dadnow$data$dates)), "%Y-%m-%d"), "to",
-    format(max(lubridate::ymd(dadnow$data$dates)), "%Y-%m-%d"), "\n"
+    "Training date range:",
+    format(min(lubridate::ymd(dadnow$prepped_data$dates_train)), "%Y-%m-%d"), "to",
+    format(max(lubridate::ymd(dadnow$prepped_data$dates_train)), "%Y-%m-%d"), "\n"
   )
 
   cat("\nTest set evaluation metrics:\n")
@@ -40,9 +40,9 @@ print.dadnow <- function(dadnow) {
 print.multidadnow <- function(dadnow) {
   cat("Date column:", dadnow$date_col, "\n")
   cat(
-    "Date range:",
+    "Training date range:",
     format(min(lubridate::ymd(dadnow$data[, dadnow$date_col])), "%Y-%m-%d"), "to",
-    format(max(lubridate::ymd(dadnow$data[, dadnow$date_col])), "%Y-%m-%d"), "\n"
+    format(max(lubridate::ymd(dadnow$data[, dadnow$date_col])), "%Y-%m-%d"), "\n\n"
   )
 
   cat("\nTest set evaluation metrics:\n")
