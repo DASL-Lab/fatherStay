@@ -1,0 +1,114 @@
+---
+title: "Mechanistic_Model"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mechanistic_Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+#library(fatherStay)
+```
+
+
+# Mechanistic Model for DAD
+
+The nature of the data suggests a possible mechanistic model. The following model structure was suggested by David Champredon and adjusted according to further statistical theory.
+
+Let $D_t$ be the DAD admission data, $R_t$ be the positive tests from the RVDSS data on week $t$, and $C_t$ and $P_t$ be the total admissions and positive tests from the CNISP and PTSOS data, respectively. The following assumptions lay the foundation of the mechanistic model:
+
+1. The total admissions are a constant fraction of the total positive tests.
+    - $D_t \approx \eta R_t$, e.g. $\eta$ = 20% of cases are hospitalized.
+    - $\eta$ is the "virulence"
+2. The total admissions are a constant fraction of *each of* the provincial and national hospital data.
+    - $\hat s_c D_t \approx C_t$ and $\hat s_p D_t \approx P_t$
+    - $\hat s_c$ and $\hat s_p$ are the sampling rates, which are assumed to be known from historical data.
+
+This gives us three equations with parameters/error terms to be estimated simultaneously:
+\begin{align*}
+E(D_t) &= \eta R_t\\
+E(C_t) &= \eta \hat s_c R_t\\
+E(P_t) &= \eta \hat s_p R_t
+\end{align*}
+
+The interpretation of this model is that the test positivity is linearly related to hopsitalizations, with a coefficient that is consistent across DAD, PTSOS, and CNISP. There is an adjustment to the coefficients for CNISP and PTSOS as they are assumed to be samples from DAD. The benefit of this framework is a more robust estimate of $\eta$, but this requires fairly strict assumptions on the data generating process.
+
+Assuming independence between $D_t$, $C_t$, and $P_t$ (conditional on $R_t$ and the parameters), this model can be estimated via Bayesian methods or with MLE. The likelhood factors into three parts:
+\begin{align*}
+f(D_t, C_t, P_t | \eta, R_t, ...) &= f_d(D_t|\eta, R_t, ...) f_c(C_t|\eta, R_t, ...) f_p(P_t|\eta, R_t, ...)
+\end{align*}
+and we can assume an appropriate likelihood for each response. The "$...$" in each factor allows for likelihoods with further parameters. If we assume a normal distribution (i.e., simple linear regression for each), then the "$...$" takes the place of the variance terms (which could also allow for correlation). A Poisson GLM would not require further parameters, but a Negative Binomial GLM would extend the Poisson GLM to include a dispersion parameter. There is no restriction that each model have the same distribution, but doing so may allow for a closed-form solution for $\eta$ by minimizing the log likelihood.
+
+Some other notes:
+
+- It may be beneficial to allow for correlated errors across the three models. It seems likely that if, say, CNISP is being underpredicted by $R_t$ then so is PTSOS. This is possible in a basic linear regression (Gaussian) framework, but difficult in GLMs in general. For Poisson and Negative Binomial, further research (as part of a separate project) into copula modelling or shared random effects may be appropriate.
+- This model assumes that $\hat s_c$ and $\hat s_p$ are known from historical data, but since we have multiple response variables it would be feasible to estimate these from the data. The package can be modified to allow for this in the future.
+
+
+### Normal Likelihoods
+
+\begin{align*}
+f(D_t|\eta, R_t, \sigma_d) &= \frac{1}{\sqrt{2\pi\sigma_d^2}} \exp\left(-\frac{(D_t - \eta R_t)^2}{2\sigma_d^2}\right)\\
+f(C_t|\eta, R_t, \sigma_c) &= \frac{1}{\sqrt{2\pi\sigma_c^2}} \exp\left(-\frac{(C_t - \eta \hat s_c R_t)^2}{2\sigma_c^2}\right)\\
+f(P_t|\eta, R_t, \sigma_p) &= \frac{1}{\sqrt{2\pi\sigma_p^2}} \exp\left(-\frac{(P_t - \eta \hat s_p R_t)^2}{2\sigma_p^2}\right)\\
+f(D_t, C_t, P_t | \eta, R_t, \sigma_d, \sigma_c, \sigma_p) &= f_d(D_t|\eta, R_t, \sigma_d) f_c(C_t|\eta, R_t, \sigma_c) f_p(P_t|\eta, R_t, \sigma_p)\\
+&= \frac{1}{(2\pi)^{3/2} \sigma_d \sigma_c \sigma_p} \exp\left(-\frac{(D_t - \eta R_t)^2}{2\sigma_d^2} -\frac{(C_t - \eta \hat s_c R_t)^2}{2\sigma_c^2} -\frac{(P_t - \eta \hat s_p R_t)^2}{2\sigma_p^2}\right)\\
+\ell(\eta, \sigma_d, \sigma_c, \sigma_p | D_t, C_t, P_t, R_t) &= -\log((2\pi)^{3/2} \sigma_d \sigma_c \sigma_p) -\frac{(D_t - \eta R_t)^2}{2\sigma_d^2} -\frac{(C_t - \eta \hat s_c R_t)^2}{2\sigma_c^2} -\frac{(P_t - \eta \hat s_p R_t)^2}{2\sigma_p^2} \\
+&= -\frac{3}{2}\log(2\pi) - \log(\sigma_d) - \log(\sigma_c) - \log(\sigma_p) -\frac{(D_t - \eta R_t)^2}{2\sigma_d^2} -\frac{(C_t - \eta \hat s_c R_t)^2}{2\sigma_c^2} -\frac{(P_t - \eta \hat s_p R_t)^2}{2\sigma_p^2}\\
+\frac{\partial \ell}{\partial \eta} &= \frac{(D_t - \eta R_t) R_t}{\sigma_d^2} + \frac{(C_t - \eta \hat s_c R_t) \hat s_c R_t}{\sigma_c^2} + \frac{(P_t - \eta \hat s_p R_t) \hat s_p R_t}{\sigma_p^2}\\
+&= \frac{D_tR_t}{\sigma_d^2} + \frac{C_t \hat s_c R_t}{\sigma_c^2} + \frac{P_t \hat s_p R_t}{\sigma_p^2} - \eta R_t^2 \left(\frac{1}{\sigma_d^2} + \frac{\hat s_c^2}{\sigma_c^2} + \frac{\hat s_p^2}{\sigma_p^2}\right)\\
+\implies \hat \eta &= \frac{\frac{D_tR_t}{\sigma_d^2} + \frac{C_t \hat s_c R_t}{\sigma_c^2} + \frac{P_t \hat s_p R_t}{\sigma_p^2}}{R_t^2 \left(\frac{1}{\sigma_d^2} + \frac{\hat s_c^2}{\sigma_c^2} + \frac{\hat s_p^2}{\sigma_p^2}\right)}
+\end{align*}
+
+We can also solve for the variance parameters in a similar way, but the main parameter of interest is $\eta$ so we will not go through that here. The main point is that we can get a closed-form solution for $\eta$ in this case, which is a weighted average of the three estimates of $\eta$ from each data source, with weights determined by the variance parameters.
+
+We can further extend this model to allow for other features, including covariances between error terms in each model, but also AR(p) terms to allow for autocorrelation in the data. This is still a tractable model, but numerical optimization will be a more generalizable approach, especially for other likelihoods.
+
+
+### Poisson Likelihoods
+
+If we assume that $\eta > 0$, $R_t > 0$, $\hat s_c > 0$, and $\hat s_p > 0$ then we can use the following set of models with Poisson likelihoods:
+\begin{align*}
+f(D_t|\eta, R_t) &= \frac{(\eta R_t)^{D_t} e^{-\eta R_t}}{D_t!}\\
+f(C_t|\eta, R_t) &= \frac{(\eta \hat s_c R_t)^{C_t} e^{-\eta \hat s_c R_t}}{C_t!}\\
+f(P_t|\eta, R_t) &= \frac{(\eta \hat s_p R_t)^{P_t} e^{-\eta \hat s_p R_t}}{P_t!}
+\end{align*}
+Note that the usual application of Poisson regression would use $\lambda_t = \exp(\beta_0 + \beta_1 R_t)$, but in this case we have a mechanistic model that suggests a linear relationship between $R_t$ and the response variables, and we have a guarantee that $\lambda_t \ge 0$ for all $t$.
+
+The log likelihood is then:
+\begin{align*}
+\ell(\eta | D_t, C_t, P_t, R_t) &= \sum_{t=1}^n\left[\log(f(D_t|\eta, R_t)) + \log(f(C_t|\eta, R_t)) + \log(f(P_t|\eta, R_t))\right]\\
+&= \sum_{t=1}^n\left[D_t \log(\eta R_t) - \eta R_t - \log(D_t!) + C_t \log(\eta \hat s_c R_t) - \eta \hat s_c R_t - \log(C_t!) + P_t \log(\eta \hat s_p R_t) - \eta \hat s_p R_t - \log(P_t!)\right\\
+&= \sum_{t=1}^n\left[(D_t + C_t + P_t) \log(\eta) + D_t \log(R_t) + C_t \log(\hat s_c R_t) + P_t \log(\hat s_p R_t) - \eta R_t (1 + \hat s_c + \hat s_p) - \log(D_t!) - \log(C_t!) - \log(P_t!)\right]\\
+&= \sum_{t=1}^n\left[(D_t + C_t + P_t) \log(\eta) + \eta R_t (1 + \hat s_c + \hat s_p)\right] + \text{const.}
+\end{align*}
+
+Note that $\hat \eta$ is the only parameter in this model. By standard Maximum Likelihood Estimation, the estimate for $\hat \eta$ is:
+\begin{align*}
+\hat \eta &= \frac{\bar D_t + \bar C_t + \bar P_t}{3(1 + \hat s_c + \hat s_p) \bar R}
+\end{align*}
+where the notation $\bar X$ represents the average of $X_t$ across all time points. The form of this estimator is essentially the result of combining $D_t$, $R_t$, and $P_t$ into a single vector and finding their weighted mean. This is a very simple estimator that assumes independence over time and between all three models.
+
+### Negative Binomial Likelihoods
+
+If we want to allow for overdispersion in the data, we can use Negative Binomial likelihoods instead of Poisson likelihoods. The form of the likelihood is more complicated, but the main point is that we can still estimate $\eta$ via MLE, but there is no closed-form solution and numerical optimization will be required. For posterity, the likelihoods are:
+\begin{align*}
+f(D_t|\eta, R_t, \theta_d) &= {D_t + \theta_d - 1 \choose D_t} \left(\frac{\eta R_t}{\eta R_t + \theta_d}\right)^{D_t} \left(\frac{\theta_d}{\eta R_t + \theta_d}\right)^{\theta_d}\\
+f(C_t|\eta, R_t, \theta_c) &= {C_t + \theta_c - 1 \choose C_t} \left(\frac{\eta \hat s_c R_t}{\eta \hat s_c R_t + \theta_c}\right)^{C_t} \left(\frac{\theta_c}{\eta \hat s_c R_t + \theta_c}\right)^{\theta_c}\\
+f(P_t|\eta, R_t, \theta_p) &= {P_t + \theta_p - 1 \choose P_t} \left(\frac{\eta \hat s_p R_t}{\eta \hat s_p R_t + \theta_p}\right)^{P_t} \left(\frac{\theta_p}{\eta \hat s_p R_t + \theta_p}\right)^{\theta_p}
+\end{align*}
+
+The log likelihood becomes a large equation that can be optimized numerically within R.
+
+# AR(1) Modelling
+
+The mechanistic model above assumes that the admissions on week $t$ are a function of the test positivity on wwek $t$. However, it is reasonable to assume that the
+
