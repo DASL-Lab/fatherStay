@@ -9,8 +9,7 @@
 #' @export
 
 fit_XGBoost <- function(Y_train, X_train = NULL, X_nowcast = NULL,
-                   params = list(nrounds = 100, evals = list(), 
-                                 objective = NULL, verbose = 1,
+                   params = list(nrounds = 100, verbose = 1,
                                  XGBparams = list())) {
   
   if (!requireNamespace("xgboost", quietly = TRUE)) {
@@ -22,22 +21,16 @@ fit_XGBoost <- function(Y_train, X_train = NULL, X_nowcast = NULL,
   X_train <- data.frame(X_train)
   dMatrixTrain <- xgboost::xgb.DMatrix(X_train, label = as.matrix(Y_train))
   
+  # only does cross validation for nrounds if the number of rounds is not specified
   if (!"nrounds" %in% names(params)) {
-    nrounds <- 100
+    # internal cross validation to tune the nrounds of the model
+    XGBCV <- xgboost::xgb.cv(params = list(max_depth = 2), data = dMatrixTrain, 
+                             nrounds = 100, nfold = 5, verbose = 0, 
+                             early_stopping_rounds = 10)
+    
+    nrounds2 <- XGBCV$early_stop$best_iteration
   } else {
-    nrounds <- params$nrounds
-  }
-  
-  if (!"evals" %in% names(params)) {
-    evals <- list()
-  } else {
-    evals <- params$evals
-  }
-  
-  if (!"objective" %in% names(params)) {
-    objective <- NULL
-  } else {
-    objective <- params$objective
+    nrounds2 <- params$nrounds
   }
   
   if (!"verbose" %in% names(params)) {
@@ -47,20 +40,25 @@ fit_XGBoost <- function(Y_train, X_train = NULL, X_nowcast = NULL,
   }
   
   if (!"XGBparams" %in% names(params)) {
-    xgbParams2 = xgboost::xgb.params(max_depth = 3)
+    depths <- seq(2,10)
+    
+    cvDepth <- c()
+    
+    for (i in depths) {
+      cv <- xgboost::xgb.cv(params = list(max_depth = i), data = dMatrixTrain, 
+                            nrounds = nrounds2, nfold = 5, verbose = 0,
+                            early_stopping_rounds = 10)
+      cvDepth[i] <- cv$early_stop$best_score
+    }
+    xgbParams2 = xgboost::xgb.params(max_depth = which.min(cvDepth))
   } else {
     xgbParams2 <- params$XGBparams
   }
-
-  # internal cross validation to tune the nrounds of the model
-  XGBCV <- xgboost::xgb.cv(params = xgbParams2, data = dMatrixTrain, nrounds = nrounds, nfold = 5, verbose = 0)
-    
-  nrounds2 <- which(XGBCV$evaluation_log$test_rmse_mean == min(XGBCV$evaluation_log$test_rmse_mean))
   
   # traing the model
   XGBModel <- xgboost::xgb.train(
-    data = dMatrixTrain, params = xgbParams2, nrounds = nrounds2, evals = evals, 
-    objective = objective, verbose = verbose)
+    data = dMatrixTrain, params = xgbParams2, nrounds = nrounds2, 
+    verbose = verbose)
   
   # create the nowcasting data in the proper form
   yNow <- as.matrix(rep(NA,length(data.frame(X_nowcast)[,1])))

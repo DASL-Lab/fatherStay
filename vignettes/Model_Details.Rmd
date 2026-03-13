@@ -101,7 +101,7 @@ A random forest is a very flexible model which is very good at finding complex r
 # XGBoost
 
 The function `fit_XGBoost` useds the package `xgboost` to create an extreme gradient boosted model. This model builds a series of trees sequentially and each subsequent tree learns from the trees before it. This model has several parameter options:
- - `nrounds` the default is 100, this specifies the maximum number of boosting iterations. The function `fit_xgboost` will automatically tune this value to the data that it is given.
+ - `nrounds` this specifies the maximum number of boosting iterations. The function `fit_xgboost` will automatically tune this value to the data that it is given if there is no default value given.
  - `verbose` specifies if information about the model will be printed out when creating it, 0 makes it silent, the default is 1.
  - XGBparams is a list of more parameters used in the model, the most important of which is `max_depth` which sets the depth of the trees used in the model.
 
