@@ -8,7 +8,7 @@
 #'
 #' @returns A dadnow object with the ensemble predictions and intervals added.
 #' @export
-enbpi <- function(X_train, y_train, model, params, k, batches = 40, train_window = NULL, level = 0.95) {
+enbpi <- function(X_train, y_train, model, formula, params, k, batches = 40, train_window = NULL, level = 0.95) {
 
   if (is.null(train_window)) train_window <- floor(0.6 * length(y_train))
   
@@ -37,5 +37,14 @@ enbpi <- function(X_train, y_train, model, params, k, batches = 40, train_window
   preds_mat <- matrix(unlist(preds), nrow = k, byrow = FALSE)
   preds_ci <- apply(preds_mat, 1, function(x) quantile(x, c((1 - level)/2, 1 - (1 - level)/2)))
 
-  list(enbpi = t(preds_ci), rmse = mean(rmse), mae = mean(mae), mre = mean(mre))
+  evals = data.frame(
+    "formula" = deparse(formula),
+    "model" = model,
+    "params" = paste0(names(params), params, collapse = "_"),
+    "rmse" = mean(rmse),
+    "mae" = mean(mae),
+    "mre" = mean(mre)
+  )
+
+  list(enbpi = t(preds_ci), evals = evals)
 }

@@ -99,7 +99,7 @@ fit_mechanistic <- function(
   Y_train, X_train = NULL, X_nowcast = NULL,
   params = list(sc = 0.2, sp = 0.3, method = "normal")
 ) {
-  Dt <- Y_train[, 1]
+  Dt <- Y_train
   Ct <- X_train[, 1]
   Pt <- X_train[, 2]
   Rt <- X_train[, 3]
@@ -140,17 +140,30 @@ nowcast_mechanistic <- function(
 
   cat(
     paste0(
-      "Assuming that ", response, " contains DAD data, ", 
-      terms[1], " is CNISP, ", terms[2], " is PTSOS, and ",
-      terms[3], " is RVDSS.\n"
+      "Assuming that \"", response, "\" contains DAD data, \"", 
+      terms[1], "\" is CNISP, \"", terms[2], "\" is PTSOS, and \"",
+      terms[3], "\" is RVDSS.\n"
     )
   )
 
-  evals <- cross_val_error(X_train = prepped_data$X_train, y_train = prepped_data$y_train, folds = prepped_data$cross_val_indices, model = "mechanistic", params = params)
+  enbpi <- enbpi(
+    X_train = prepped_data$X_train,
+    y_train = prepped_data$y_train,
+    formula = "mechanistic",
+    model = "mechanistic",
+    params = params,
+    k = nrow(prepped_data$X_nowcast),
+    batches = 40,
+    train_window = floor(0.6 * nrow(prepped_data$X_train)),
+    level = 0.95
+  )
 
-  enbpi <- enbpi(X_train = prepped_data$X_train, y_train = prepped_data$y_train, model = "mechanistic", params = params, k = nrow(prepped_data$X_nowcast), batches = 40, train_window = floor(0.6 * nrow(prepped_data$X_train)), level = 0.95)
-
-  dadnow_mech <- fit_mechanistic(X_train = prepped_data$X_train, y_train = prepped_data$y_train, X_nowcast = prepped_data$X_nowcast, params = params)
+  dadnow_mech <- fit_mechanistic(
+    Y_train = prepped_data$y_train,
+    X_train = prepped_data$X_train,
+    X_nowcast = prepped_data$X_nowcast,
+    params = params
+  )
 
   dadnow <- list(
     date_col = date_col,
@@ -162,13 +175,14 @@ nowcast_mechanistic <- function(
         prepped_data = prepped_data,
         model = dadnow_mech$model,
         predictions = dadnow_mech$predictions,
-        evals = evals,
+        evals = enbpi$evals,
+        enbpi = enbpi$enbpi,
         params = params
       )
     )
   )
-  names(dadnow_obj$models)[1] <- paste0("mech_", params$method)
-  class(dadnow) <- "dadnow"
+  names(dadnow$models)[1] <- paste0("mech_", params$method)
+  class(dadnow) <- "multidadnow"
   dadnow
 }
 

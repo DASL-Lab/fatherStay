@@ -25,9 +25,7 @@ nowcast_one <- function(
   x_now <- prepped_data$X_nowcast
   y_now <- prepped_data$y_nowcast
 
-  evals <- cross_val_error(x_train, y_train, prepped_data$cross_val_indices, model, params)
-
-  enbpi <- enbpi(X_train = x_train, y_train = y_train, model = model, params = params, k = nrow(x_now), batches = batches, train_window = train_window, level = level)
+  enbpi <- enbpi(X_train = x_train, y_train = y_train, formula = formula, model = model, params = params, k = nrow(x_now), batches = batches, train_window = train_window, level = level)
 
   # Fit to all training, create nowcast
   nowcast <- dispatch_model(model)(
@@ -47,7 +45,8 @@ nowcast_one <- function(
         prepped_data = prepped_data,
         model = nowcast$model,
         predictions = nowcast$prediction,
-        evals = evals,
+        evals = enbpi$evals,
+        enbpi = enbpi$enbpi,
         params = params
       )
     )
@@ -76,6 +75,7 @@ dispatch_model <- function(model, x_train, y_train, x_nowcast, params) {
     "kf" = fit_KalmanFilter,
     "rf" = fit_RF,
     "xgboost" = fit_XGBoost,
+    "mechanistic" = fit_mechanistic,
     model
   )
 }
