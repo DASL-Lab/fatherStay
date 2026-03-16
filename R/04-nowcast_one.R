@@ -3,7 +3,6 @@
 #' @param formula A formula, e.g. y ~ x, y ~ lag(x1, 1) + lag(x2, 3)
 #' @param data A data frame. Must contain the variables specified in the formula and in `date_col`. Trailing NA values in `y` will be nowcasted.
 #' @param model The model to use for nowcasting. Currently implemented: "lm", "ar". Can be a vector, in which case the model is trained for each model in the vector.
-#' @param test_size The proportion of the data to use for testing. If NULL, the data are not split. Defaults to 10% of the data.
 #' @param params The parameters to use for the model. Must be a named list.
 #' @param date_col Name of the column containing date information. If NULL, the date information attempted to be inferred. If there's a single datetime column then it is used. If the data are a ts or mts or zoo object, the dates are esxtracted.
 #' @param eval A character vector of evaluation metrics to use. Currently implemented: "rmse", "mae", and "mre" (mean relative error).
@@ -12,31 +11,28 @@
 #'
 #' @export
 nowcast_one <- function(
-    formula, data, model, batches = 40, train_window = NULL, level = 0.95, test_size = 0.1, params = NULL, date_col = NULL
+    formula, data, model, batches = 40, train_window = NULL, level = 0.95, params = NULL, date_col = NULL
   ) {
 
   prepped_data <- prep_data(
-    formula, data, model, test_size, date_col = date_col
+    formula, data, model, date_col = date_col
   )
   
   model_id <- make_model_id(model, params)
 
   x_train <- prepped_data$X_train
   y_train <- prepped_data$y_train
-  x_test <- prepped_data$X_test
-  y_test <- prepped_data$y_test
   x_now <- prepped_data$X_nowcast
   y_now <- prepped_data$y_nowcast
 
-  # Fit to training, evaluate on test
   evals <- cross_val_error(x_train, y_train, prepped_data$cross_val_indices, model, params)
 
   enbpi <- enbpi(X_train = x_train, y_train = y_train, model = model, params = params, k = nrow(x_now), batches = batches, train_window = train_window, level = level)
 
   # Fit to all training, create nowcast
   nowcast <- dispatch_model(model)(
-    X_train = rbind(x_train, x_test),
-    Y_train = c(y_train, y_test),
+    X_train = x_train,
+    Y_train = y_train,
     X_nowcast = x_now,
     params = params
   )

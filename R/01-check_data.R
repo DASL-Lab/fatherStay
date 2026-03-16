@@ -3,7 +3,6 @@
 #' @param formula A formula object.
 #' @param data A data frame.
 #' @param model The model to use for nowcasting. Currently implemented: "lm", "ar". Can be a vector, in which case the model is trained for each model in the vector.
-#' @param test_size The proportion of the data to use for testing. If NULL, the data are not split. Defaults to 10% of the data.
 #' @param date_col Name of the column containing date information. If NULL, the date information attempted to be inferred. If there's a single datetime column then it is used. If the data are a ts or mts or zoo object, the dates are esxtracted.
 #' @param interpolate Whether to interpolate missing values. Defaults to TRUE.
 #' @param folds The number of folds to use for cross validation. Defaults to 5.
@@ -11,7 +10,7 @@
 #' @returns Object of class dadnow
 #' @export
 prep_data <- function(
-  formula, data, model, test_size = 0.1, date_col = NULL, interpolate = TRUE, folds = 5,
+  formula, data, model, date_col = NULL, interpolate = TRUE, folds = 5,
   cross_val_indices = NULL,
   quiet = FALSE
 ) {
@@ -23,7 +22,7 @@ prep_data <- function(
   diffs <- diff(data[, date_col])
   diffs <- diffs[!is.na(diffs)]
 
-  # Training, test and nowcasting data
+  # Training and nowcasting data
   response <- all.vars(formula)[1]
   covariates <- all.vars(formula)[-1]
   stopifnot(all(covariates %in% colnames(data)))
@@ -39,18 +38,14 @@ prep_data <- function(
   trailing_nas <- find_nas(y)
   stopifnot(trailing_nas > 0)
   num_non_na <- length(y) - trailing_nas
-  train_max = floor(num_non_na * (1 - test_size))
-  test_max = num_non_na - train_max
 
   model_matrix <- parse_lag_formula(formula, data)
 
-  X_train <- model_matrix[1:train_max, , drop = FALSE]
-  X_test <- model_matrix[(train_max + 1):(train_max + test_max), , drop = FALSE]
-  X_nowcast <- model_matrix[(train_max + test_max + 1):nrow(data), , drop = FALSE]
-  y_train <- y[1:train_max]
-  y_test <- y[(train_max + 1):(train_max + test_max)]
+  X_train <- model_matrix[1:num_non_na, , drop = FALSE]
+  X_nowcast <- model_matrix[(num_non_na + 1):nrow(data), , drop = FALSE]
+  y_train <- y[1:num_non_na]
   # I don't know why this is here - it's all NAs anyway.
-  y_nowcast <- y[(test_max + 1):nrow(data)]
+  y_nowcast <- y[(num_non_na + 1):nrow(data)]
 
   if(is.null(cross_val_indices)) {
     cross_val_indices <- sample(1:folds, nrow(X_train), replace = TRUE)
@@ -63,12 +58,10 @@ prep_data <- function(
     data = data,
     date_col = date_col,
     X_train = X_train,
-    X_test = X_test,
     y_train = y_train,
-    y_test = y_test,
     cross_val_indices = cross_val_indices,
-    dates_train = dates[1:(train_max + test_max)],
-    dates_nowcast = dates[(train_max + test_max + 1):length(dates)],
+    dates_train = dates[1:(num_non_na)],
+    dates_nowcast = dates[(num_non_na + 1):length(dates)],
     X_nowcast = X_nowcast,
     y_nowcast = y_nowcast,
     dates = dates

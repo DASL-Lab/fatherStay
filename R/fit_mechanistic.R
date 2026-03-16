@@ -95,7 +95,15 @@ optim_negbinom <- function(Dt, Rt, Ct, Pt, sc = 0.2, sp = 0.3) {
 #' d2 <- sim_poisson_data(eta = 5, Rt = rpois(100, 100))
 #' fit_mechanistic(d2$Dt, d2$Ct, d2$Pt, d2$Rt, Rt_nowcast = rpois(10, 100), method = "poisson")
 #' @export
-fit_mechanistic <- function(Dt, Ct, Pt, Rt, Rt_nowcast, sc = 0.2, sp = 0.3, method = "normal") {
+fit_mechanistic <- function(
+  Y_train, X_train = NULL, X_nowcast = NULL,
+  params = list(sc = 0.2, sp = 0.3, method = "normal")
+) {
+  Dt <- Y_train[, 1]
+  Ct <- X_train[, 1]
+  Pt <- X_train[, 2]
+  Rt <- X_train[, 3]
+  Rt_nowcast <- X_nowcast[, 3]
   optim_res <- switch(method,
     "normal" = optim_normal(Dt, Rt, Ct, Pt, sc, sp),
     "poisson" = optim_poisson(Dt, Rt, Ct, Pt, sc, sp),
@@ -108,54 +116,42 @@ fit_mechanistic <- function(Dt, Ct, Pt, Rt, Rt_nowcast, sc = 0.2, sp = 0.3, meth
   list(model = model, predictions = optim_res$par[1] + optim_res$par[2] * Rt_nowcast)
 }
 
+
 #' Fit a mechanistic model to the data, returning a dadnow object
 #' 
 #' @param formula A formula object, *must* be of the form Dt ~ Ct + Pt + Rt.
 #' @param data A data frame. Must contain the variables specified in the formula and in `date_col`. Trailing NA values in `y` will be nowcasted.
-#' @param test_size The proportion of the data to use for testing. If NULL, the data are not split. Defaults to 10% of the data.
 #' @param params The parameters to use for the model. Must be a named list containing sc and sp and method (normal, poisson, or negbinom).
 #' @param date_col Name of the column containing date information. If NULL, the date information attempted to be inferred. If there's a single datetime column then it is used. If the data are a ts or mts or zoo object, the dates are esxtracted.
 #'
 #' @returns A dadnow object with the mechanistic model added.
 #' @export
 nowcast_mechanistic <- function(
-  formula, data, test_size = 0.1,
-  params = list(sc = 0.2, sp = 0.3, method = "poisson"),
-  date_col = NULL
+  formula, data, batches = 40, train_window = NULL, level = 0.95, date_col = NULL,
+  params = list(sc = 0.2, sp = 0.3, method = "normal")
 ) {
 
   prepped_data <- prep_data(
-    formula, data, model = "mechanistic", test_size, date_col = date_col
+    formula, data, model = "mechanistic",, date_col = date_col
   )
 
-  test_preds <- fit_mechanistic(
-    Dt = prepped_data$y_train,
-    Ct = prepped_data$X_train[, 1],
-    Pt = prepped_data$X_train[, 2],
-    Rt = prepped_data$X_train[, 3],
-    Rt_nowcast = prepped_data$X_test[, 3],
-    sc = params$sc,
-    sp = params$sp,
-    method = params$method
-  )$predictions
+  response <- all.vars(formula)[1]
+  terms <- all.vars(formula)[-1]
 
-  eval <- data.frame(
-    "formula" = paste0("mech_", params$method),
-    "model" = paste0("mech_", params$method),
-    "params" = paste0(names(params), params, collapse = "_"),
-    "rmse" = sqrt(mean((prepped_data$y_test - test_preds)^2)),
-    "mae" = mean(abs(prepped_data$y_test - test_preds)),
-    "mre" = mean(((prepped_data$y_test - test_preds) / (prepped_data$y_test + 0.1))^2)
+  cat(
+    paste0(
+      "Assuming that ", response, " contains DAD data, ", 
+      terms[1], " is CNISP, ", terms[2], " is PTSOS, and ",
+      terms[3], " is RVDSS.\n"
+    )
   )
 
-  Dt <- c(prepped_data$y_train, prepped_data$y_test)
-  Ct <- c(prepped_data$X_train[, 1], prepped_data$X_test[, 1])
-  Pt <- c(prepped_data$X_train[, 2], prepped_data$X_test[, 2])
-  Rt <- c(prepped_data$X_train[, 3], prepped_data$X_test[, 3])
+  evals <- cross_val_error(X_train = prepped_data$X_train, y_train = prepped_data$y_train, folds = prepped_data$cross_val_indices, model = "mechanistic", params = params)
 
-  Rt_nowcast <- prepped_data$X_nowcast[, 3]
+  enbpi <- enbpi(X_train = prepped_data$X_train, y_train = prepped_data$y_train, model = "mechanistic", params = params, k = nrow(prepped_data$X_nowcast), batches = 40, train_window = floor(0.6 * nrow(prepped_data$X_train)), level = 0.95)
 
-  dadnow_mech <- fit_mechanistic(Dt, Ct, Pt, Rt, Rt_nowcast, params$sc, params$sp, params$method)
+  dadnow_mech <- fit_mechanistic(X_train = prepped_data$X_train, y_train = prepped_data$y_train, X_nowcast = prepped_data$X_nowcast, params = params)
+
   dadnow <- list(
     date_col = date_col,
     data = as.data.frame(data),
@@ -166,12 +162,12 @@ nowcast_mechanistic <- function(
         prepped_data = prepped_data,
         model = dadnow_mech$model,
         predictions = dadnow_mech$predictions,
-        evals = eval,
+        evals = evals,
         params = params
       )
     )
   )
-  
+  names(dadnow_obj$models)[1] <- paste0("mech_", params$method)
   class(dadnow) <- "dadnow"
   dadnow
 }
@@ -188,7 +184,7 @@ nowcast_mechanistic <- function(
 #' @export
 add_mechanistic <- function(dadnow, formula, params = list(sc = 0.2, sp = 0.3, method = "poisson")) {
   dadnow_mech <- nowcast_mechanistic(
-    formula, data = dadnow$data, test_size = 0.1,
+    formula, data = dadnow$data, 
     params = params,
     date_col = dadnow$date_col
   )
