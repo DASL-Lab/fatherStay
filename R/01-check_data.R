@@ -98,6 +98,14 @@ parse_dates <- function(data, date_col, quiet) {
   data
 }
 
+#' Return the number of NA's at the end of a vector (internal)
+#'
+#' @param y A vector of values with some number of NA's at the end of it.
+find_nas <- function(y) {
+  which(rev(y) != "NA") |>
+    min() - 1
+}
+
 parse_lag_formula <- function(formula, data) {
   # Expand the formula to handle shorthand like (x + z)^2
   tms <- terms(formula, data = data)
