@@ -26,8 +26,8 @@ nowcast <- function(
   y_train <- prepped_data$y_train
   x_now <- prepped_data$X_nowcast
   y_now <- prepped_data$y_nowcast
-
-  enbpi <- enbpi(X_train = x_train, y_train = y_train, formula = formula, model = model, params = params, k = nrow(x_now), batches = batches, train_window = train_window, level = level)
+  
+  enbpi <- enbpi(X_train = x_train, y_train = y_train, formula = prepped_data$formula, model = model, params = params, k = nrow(x_now), batches = batches, train_window = train_window, level = level)
 
   # Fit to all training, create nowcast
   nowcast <- dispatch_model(model)(

@@ -75,6 +75,7 @@ add_model.dadnow <- function(dadnow, formula = NULL, model, params = NULL) {
 }
 
 #' @rdname add_model.dadnow
+#' @export
 add_model.multidadnow <- function(multidadnow, formula = NULL, model, params = NULL) {
   
   if (is.null(formula)) {
@@ -87,12 +88,16 @@ add_model.multidadnow <- function(multidadnow, formula = NULL, model, params = N
     cross_val_indices = multidadnow$cross_val_indices
   )
 
-  new_eval <- cross_val_error(
+  enbpi <- enbpi(
     X_train = prepped_data$X_train,
     y_train = prepped_data$y_train,
-    folds = prepped_data$cross_val_indices,
+    formula = prepped_data$formula,
     model = model,
-    params = params
+    params = params,
+    k = nrow(prepped_data$X_nowcast),
+    batches = 40,
+    train_window = NULL,
+    level = 0.95
   )
 
   new_preds <- dispatch_model(model)(
@@ -109,7 +114,7 @@ add_model.multidadnow <- function(multidadnow, formula = NULL, model, params = N
     prepped_data = prepped_data,
     model = new_preds$model,
     predictions = new_preds$prediction,
-    evals = new_eval,
+    evals = enbpi$evals,
     params = params
   )
   names(multidadnow$models)[length(multidadnow$models)] <- make_model_id(model, params)

@@ -102,14 +102,14 @@ fit_mechanistic <- function(
   Pt <- X_train[, 2]
   Rt <- X_train[, 3]
   Rt_nowcast <- X_nowcast[, 3]
-  optim_res <- switch(method,
-    "normal" = optim_normal(Dt, Rt, Ct, Pt, sc, sp),
-    "poisson" = optim_poisson(Dt, Rt, Ct, Pt, sc, sp),
-    "negbinom" = optim_negbinom(Dt, Rt, Ct, Pt, sc, sp)
+  optim_res <- switch(params$method,
+    "normal" = optim_normal(Dt, Rt, Ct, Pt, params$sc, params$sp),
+    "poisson" = optim_poisson(Dt, Rt, Ct, Pt, params$sc, params$sp),
+    "negbinom" = optim_negbinom(Dt, Rt, Ct, Pt, params$sc, params$sp)
   )
   if (optim_res$convergence != 0) warning("Model did not converge.")
 
-  model <- c(optim_res$par, sc = sc, sp = sp, method = method, convergence = optim_res$convergence)
+  model <- c(optim_res$par, sc = params$sc, sp = params$sp, method = params$method, convergence = optim_res$convergence)
 
   list(model = model, predictions = optim_res$par[1] + optim_res$par[2] * Rt_nowcast)
 }
