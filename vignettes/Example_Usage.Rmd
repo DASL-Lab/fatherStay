@@ -30,7 +30,11 @@ tail(df, 12) # last 10 are NA - to be nowcast!
 
 ```{r}
 dadnow2 <- nowcast_one(
-  dad ~ lag(cnisp, 3) + lag(ptsos, 3), df, model = "ar", date_col = "date", params = list(order = 1)
+  formula = dad ~ lag(cnisp, 3) + lag(ptsos, 3),
+  data = df, 
+  model = "ar", 
+  date_col = "date", 
+  params = list(order = 1)
 )
 
 dadnow2 <- add_model(dadnow2, model = "ar", params = list(order = 2)) |>
