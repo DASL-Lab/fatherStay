@@ -99,7 +99,7 @@ nowcast_mechanistic <- function(
 ) {
 
   prepped_data <- prep_data(
-    formula, data, model = "mechanistic",, date_col = date_col
+    formula, data, model = "mechanistic", date_col = date_col
   )
 
   response <- all.vars(formula)[1]
