@@ -25,7 +25,6 @@ working/*
 .Rproj.user/
 
 # produced vignettes
-vignettes/*.html
 vignettes/*.pdf
 
 # OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
