@@ -42,6 +42,12 @@ enbpi <- function(X_train, y_train, model, formula, params, k, batches = 40, tra
   preds_mat <- matrix(unlist(preds), nrow = k, byrow = FALSE)
   preds_ci <- apply(preds_mat, 1, function(x) quantile(x, c((1 - level)/2, 1 - (1 - level)/2)))
 
+  if (model %in% c("ar", "arx")) {
+    model <- paste0(model, params$order)
+  } else if (model == "mechanistic") {
+    model <- paste0("mech_", params$method)
+  }
+
   evals = data.frame(
     "formula" = deparse(formula),
     "model" = model,

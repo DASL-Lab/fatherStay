@@ -19,8 +19,6 @@ nowcast <- function(
   prepped_data <- prep_data(
     formula, data, model, date_col = date_col
   )
-  
-  model_id <- make_model_id(model, params)
 
   x_train <- prepped_data$X_train
   y_train <- prepped_data$y_train
@@ -59,9 +57,10 @@ nowcast <- function(
   dadnow_obj <- list(
     date_col = date_col,
     data = aug_data,
+    evals = enbpi$evals,
     models = list(
       list(
-        model_id = model_id,
+        model_id = make_model_id(enbpi$evals),
         formula = formula,
         prepped_data = prepped_data,
         model = nowcast$model,
@@ -72,18 +71,30 @@ nowcast <- function(
       )
     )
   )
-  names(dadnow_obj$models)[1] <- model_id
+
+  names(dadnow_obj$models)[1] <- make_model_id(enbpi$evals)
   class(dadnow_obj) <- "multidadnow"
 
   dadnow_obj
 }
 
-make_model_id <- function(model, params) {
-  if (!is.character(model)) model <- as.character(substitute(model))
-  model_id <- paste0(model, "_",
-    paste0(names(params), params, collapse = "_")
+make_model_id <- function(evals) {
+
+  all_formulas <- paste0("f", match(evals$formula, unique(evals$formula)))
+  all_models <- evals$model#paste0("m", match(evals$model, unique(evals$model)))
+  model_ids <- paste0(all_formulas, "_",  all_models)
+
+  param_set <- ave(
+    seq_len(nrow(evals)),
+    all_models, 
+    all_formulas,
+    FUN = seq_along
   )
-  gsub("_$", "", model_id)
+  
+  suffix <- ifelse(param_set > 1, letters[param_set], "")
+  model_ids <- paste0(model_ids, suffix)
+
+  model_ids
 }
 
 dispatch_model <- function(model, x_train, y_train, x_nowcast, params) {
@@ -118,8 +129,10 @@ nowcast_mechanistic <- function(
 ) {
 
   prepped_data <- prep_data(
-    formula, data, model = "mechanistic", date_col = date_col
+    formula, data, model = paste0("mech_", params$method), date_col = date_col
   )
+
+  
 
   response <- all.vars(formula)[1]
   terms <- all.vars(formula)[-1]
@@ -136,7 +149,7 @@ nowcast_mechanistic <- function(
   enbpi <- enbpi(
     X_train = prepped_data$X_train,
     y_train = prepped_data$y_train,
-    formula = paste0("mech_", params$method),
+    formula = formula,
     model = "mechanistic",
     params = params,
     k = nrow(prepped_data$X_nowcast),
@@ -174,9 +187,10 @@ nowcast_mechanistic <- function(
   dadnow <- list(
     date_col = date_col,
     data = aug_data,
+    evals = enbpi$evals,
     models = list(
       list(
-        model_id = paste0("mech_", params$method),
+        model_id = make_model_id(enbpi$evals),
         formula = paste0("mech_", params$method),
         prepped_data = prepped_data,
         model = dadnow_mech$model,
@@ -187,7 +201,12 @@ nowcast_mechanistic <- function(
       )
     )
   )
-  names(dadnow$models)[1] <- paste0("mech_", params$method)
+  model_ids <- make_model_id(enbpi$evals)
+  names(dadnow$models)[1] <- model_ids
+  for (i in seq_along(dadnow$models)) {
+    dadnow$models[[i]]$model_id <- model_ids[i]
+  }
+
   class(dadnow) <- "multidadnow"
   dadnow
 }

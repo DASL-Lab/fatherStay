@@ -44,9 +44,9 @@ dadnow2 <- add_model(dadnow2, model = "ar", params = list(order = 2)) |>
   add_model(model = "lm") |>
   add_model(model = "arx", params = list(order = 1)) |>
   add_model(model = "gam", params = list(smooths = list("cnisp_lag0"=10))) |>
-  add_model(model = "rf", formula = dad ~ lag(cnisp, 2), params = list(ntree = 500, mtry = 3))
+  add_model(model = "rf", formula = dad ~ lag(cnisp, 2), params = list(ntree = 100, mtry = 3))
 
-dadnow2 <- add_model(dadnow2, model = "xgboost", params = list(nrounds = 100))
+dadnow2 <- add_model(dadnow2, model = "xgboost", params = list(nrounds = 20))
 
 dadnow2
 
