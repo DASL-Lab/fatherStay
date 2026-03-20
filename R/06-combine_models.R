@@ -17,21 +17,19 @@ combine_dadnow <- function(dadnow1, dadnow2) {
   model_ids <- make_model_id(evals)
   rownames(evals) <- model_ids
 
-    models <- c(dadnow1$models, dadnow2$models)
-    names(models) <- c(names(dadnow1$models), names(dadnow2$models))
-    return_value <- list(
-      date_col = dadnow1$date_col,
-      data = data,
-      evals = evals,
-      models = models
-    )
-    class(return_value) <- "multidadnow"
-  } else {
-    stop("Both inputs must be of class 'dadnow' or 'multidadnow'.")
-  }
+  models <- c(dadnow1$models, dadnow2$models)
 
+  return_value <- list(
+    date_col = dadnow1$date_col,
+    data = data,
+    evals = evals,
+    models = models
+  )
+  class(return_value) <- "multidadnow"
+
+  names(return_value$models) <- model_ids
   for (i in seq_along(return_value$models)) {
-    return_value$models[[i]]$model_id <- rownames(return_value$evals)[i]
+    return_value$models[[i]]$model_id <- model_ids[i]
   }
   
   return(return_value)

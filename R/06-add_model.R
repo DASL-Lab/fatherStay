@@ -75,10 +75,11 @@ add_model.multidadnow <- function(multidadnow, formula = NULL, model, params = N
   )
 
   all_evals <- do.call(rbind, lapply(multidadnow$models, function(x) x$evals))
-  rownames(all_evals) <- make_model_id(all_evals)
-  multidadnow$evals <- all_evals[order(all_evals$model), ]
+  model_ids <- make_model_id(all_evals)
 
-  model_ids <- make_model_id(multidadnow$evals)
+  rownames(all_evals) <- model_ids
+
+  multidadnow$evals <- all_evals
   names(multidadnow$models) <- model_ids
   for (i in seq_along(multidadnow$models)) {
     multidadnow$models[[i]]$model_id <- model_ids[i]

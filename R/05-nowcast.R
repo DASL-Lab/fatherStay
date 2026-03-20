@@ -72,7 +72,7 @@ nowcast <- function(
     )
   )
 
-  names(dadnow_obj$models)[1] <- make_model_id(enbpi$evals)
+  names(dadnow_obj$models) <- make_model_id(enbpi$evals)
   class(dadnow_obj) <- "multidadnow"
 
   dadnow_obj
@@ -202,7 +202,7 @@ nowcast_mechanistic <- function(
     )
   )
   model_ids <- make_model_id(enbpi$evals)
-  names(dadnow$models)[1] <- model_ids
+  names(dadnow$models) <- model_ids
   for (i in seq_along(dadnow$models)) {
     dadnow$models[[i]]$model_id <- model_ids[i]
   }
