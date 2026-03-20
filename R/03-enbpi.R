@@ -18,6 +18,7 @@ enbpi <- function(X_train, y_train, model, formula, params, k, batches = 40, tra
   train_indices <- sample(1:(length(y_train) - k - train_window), batches, replace = TRUE)
 
   preds <- vector(mode = "list", length = batches)
+  resids <- vector(mode = "list", length = batches)
   rmse <- vector(mode = "numeric", length = batches)
   mae <- vector(mode = "numeric", length = batches)
   mre <- vector(mode = "numeric", length = batches)
@@ -32,14 +33,15 @@ enbpi <- function(X_train, y_train, model, formula, params, k, batches = 40, tra
 
     # Fit the model
     preds[[i]] <- dispatch_model(model)(X_train = X_train_k, Y_train = y_train_k, X_nowcast = X_test_k, params = params)$prediction$prediction
+    resids[[i]] <- y_test_k - preds[[i]]
     
     rmse[i] <- sqrt(mean((y_test_k - preds[[i]])^2))
     mae[i] <- mean(abs(y_test_k - preds[[i]]))
     mre[i] <- mean(((y_test_k - preds[[i]]) / (y_test_k + 0.1))^2)
   }
 
-  preds_mat <- matrix(unlist(preds), nrow = k, byrow = FALSE)
-  preds_ci <- apply(preds_mat, 1, function(x) quantile(x, c((1 - level)/2, 1 - (1 - level)/2)))
+  resids_mat <- matrix(unlist(resids), nrow = k, byrow = FALSE)
+  resids_se <- apply(resids_mat, 1, function(x) sd(x))
 
   if (model %in% c("ar", "arx")) {
     model <- paste0(model, params$order)
@@ -56,5 +58,5 @@ enbpi <- function(X_train, y_train, model, formula, params, k, batches = 40, tra
     "mre" = mean(mre)
   )
 
-  list(enbpi = t(preds_ci), evals = evals)
+  list(se = resids_se, evals = evals)
 }
