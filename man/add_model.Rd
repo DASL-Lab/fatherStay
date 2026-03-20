@@ -2,16 +2,19 @@
 % Please edit documentation in R/06-add_model.R
 \name{add_model}
 \alias{add_model}
+\alias{add_model.multidadnow}
 \title{Add a model to an existing dadnow or multidadnow object}
 \usage{
 add_model(x, ...)
+
+\method{add_model}{multidadnow}(multidadnow, model, formula = NULL, params = NULL)
 }
 \arguments{
 \item{x}{A dadnow or multidadnow object.}
 
-\item{formula}{A formula object.}
-
 \item{model}{The model to use for nowcasting. Currently implemented: "lm", "ar". Can be a vector, in which case the model is trained for each model in the vector.}
+
+\item{formula}{A formula object.}
 
 \item{params}{The parameters to use for the model. Must be a named list.}
 }

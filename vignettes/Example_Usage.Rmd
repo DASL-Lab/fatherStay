@@ -19,7 +19,7 @@ devtools::load_all()
 library(ggplot2)
 ```
 
-This vignette is currently my testing grounds, and ensure that basic functionality works whenever I make a change to the backend.
+We'll start by simulating some data from a mechanistic model. The `simulate_mechanistic()` function generates a data frame with a single time series, with the response variable `dad` and covariates `cnisp`, `ptsos`, and `npos`. The data frame also include a `date` column. The last 10 observations are NA, which will be used for nowcasting.
 
 ```{r}
 df <- simulate_mechanistic()
@@ -27,9 +27,9 @@ tail(df, 12) # last 10 are NA - to be nowcast!
 pairs(df[, -1])
 ```
 
-The basic usage of the package involves the "nowcast" function, which fits a single nowcasting model to the data. The formula interface is used to specify the response variable and covariates, and lags can be specified using the "lag" function. The function converts the data into a standard format across all models so that a single "dadnow" object can be used to store the results of multiple models, and the same plotting and evaluation functions can be used regardless of the underlying model.
+The basic usage of the package involves the "nowcast" function, which fits a single nowcasting model to the data. The formula interface is used to specify the response variable and covariates, and lags can be specified using the "lag" function within the formula. The function converts the data into a standard format across all models so that a single "multidadnow" object can be used to store the results of multiple models, and the same plotting and evaluation functions can be used regardless of the underlying model.
 
-There's also an `autoplot()` method for "dadnow" objects, which plots the nowcast against the observed data. By default, it plots all training data in the "dadnow" object, but the `last_n` argument can be used to specify how many of the most recent observations to plot.
+There's also an `autoplot()` method for "multidadnow" objects, which plots the nowcast against the observed data. By default, it plots all training data in the "multidadnow" object, but the `last_n` argument can be used to specify how many of the most recent observations to plot.
 
 ```{r}
 dadnow2 <- nowcast(
@@ -44,7 +44,7 @@ dadnow2 <- add_model(dadnow2, model = "ar", params = list(order = 2)) |>
   add_model(model = "lm") |>
   add_model(model = "arx", params = list(order = 1)) |>
   add_model(model = "gam", params = list(smooths = list("cnisp_lag0"=10))) |>
-  add_model(model = "rf", formula = dad ~ lag(cnisp, 2), params = list(ntree = 100, mtry = 3))
+  add_model(model = "rf", formula = dad ~ lag(cnisp, 2), params = list(ntree = 500, mtry = 3))
 
 dadnow2 <- add_model(dadnow2, model = "xgboost", params = list(nrounds = 20))
 
@@ -55,7 +55,7 @@ autoplot(dadnow2, last_n = 50) +
 
 ```
 
-The package includes a "mechanistic" model, which can be seen in `vignette("mechanistic_model")`. The model takes the parameters `sc` and `sp` and requires a method ("normal", "poisson", or "negbinom") to specify the distribution of the error term. Because it works slightly differently than the other models, it is added to a "dadnow" object using the `add_mechanistic` function, which takes the same formula interface as `nowcast` but with different parameters. The mechanistic model can be added alongside the other models, and the same plotting and evaluation functions can be used.
+The package includes a "mechanistic" model, which can be seen in `vignette("mechanistic_model")`. The model takes the parameters `sc` and `sp` and requires a method ("normal", "poisson", or "negbinom") to specify the distribution of the error term. Because it works slightly differently than the other models, it is added to a "multidadnow" object using the `add_mechanistic` function, which takes the same formula interface as `nowcast` but with different parameters. The mechanistic model can be added alongside the other models, and the same plotting and evaluation functions can be used.
 
 Note that the mechanistic assumption is sensitive to the values of sc and sp, and there will often be warnings about lack of convergence in the optimization process.
 
@@ -67,7 +67,7 @@ mech <- nowcast_mechanistic(
 mech
 ```
 
-In addition to `add_model()` and `add_mechanistic()`, which adds a single model to a "dadnow" object, there is also a `combine_dadnow` function, which combines two "dadnow" objects.
+In addition to `add_model()` and `add_mechanistic()`, which adds a single model to a "multidadnow" object, there is also a `combine_dadnow` function, which combines two "multidadnow" objects.
 
 ```{r}
 dadnow3 <- combine_dadnow(dadnow2, mech) |>
