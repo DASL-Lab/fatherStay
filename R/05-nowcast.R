@@ -64,7 +64,7 @@ nowcast <- function(
         formula = formula,
         prepped_data = prepped_data,
         model = nowcast$model,
-        predictions = nowcast$prediction$prediction,
+        predictions = nowcast$prediction,
         evals = enbpi$evals,
         enbpi = enbpi$enbpi,
         params = params
@@ -194,7 +194,7 @@ nowcast_mechanistic <- function(
         formula = paste0("mech_", params$method),
         prepped_data = prepped_data,
         model = dadnow_mech$model,
-        predictions = dadnow_mech$prediction$prediction,
+        predictions = dadnow_mech$prediction,
         evals = enbpi$evals,
         enbpi = enbpi$enbpi,
         params = params
