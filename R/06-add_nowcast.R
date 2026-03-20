@@ -7,7 +7,7 @@
 #'
 #' @returns A dadnow or multidadnow object with the model added.
 #' @export
-add_model <- function(multidadnow, model, formula = NULL, params = NULL) {
+add_nowcast <- function(multidadnow, model, formula = NULL, params = NULL) {
   
   
   if ("model" %in% names(multidadnow$data)) {
@@ -109,6 +109,6 @@ add_mechanistic <- function(dadnow, formula, params = list(sc = 0.2, sp = 0.3, m
     date_col = dadnow$date_col
   )
   
-  dadnow <- combine_dadnow(dadnow, dadnow_mech)
+  dadnow <- combine_nowcasts(dadnow, dadnow_mech)
   dadnow
 }

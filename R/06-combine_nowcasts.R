@@ -5,7 +5,7 @@
 #'
 #' @returns A single multidadnow object.
 #' @export
-combine_dadnow <- function(dadnow1, dadnow2) {
+combine_nowcasts <- function(dadnow1, dadnow2) {
   data <- rbind(dadnow1$data, dadnow2$data)
   data <- data[!duplicated(data), ]
 
