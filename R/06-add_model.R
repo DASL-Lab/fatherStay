@@ -71,6 +71,7 @@ add_model.multidadnow <- function(multidadnow, formula = NULL, model, params = N
     model = new_preds$model,
     predictions = new_preds$prediction$prediction,
     evals = enbpi$evals,
+    enbpi = enbpi$enbpi,
     params = params
   )
 

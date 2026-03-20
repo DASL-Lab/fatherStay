@@ -25,7 +25,7 @@ autoplot.multidadnow <- function(multidadnow, last_n = NULL) {
     plot_data <- rbind(plot_data, 
       data.frame(
         x = multidadnow$models[[i]]$prepped_data$dates_nowcast,
-        y = multidadnow$models[[i]]$predictions,
+        y = multidadnow$models[[i]]$prediction,
         method = new_name
       )
     )
