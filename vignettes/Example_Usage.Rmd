@@ -56,8 +56,9 @@ dadnow2 <- add_nowcast(dadnow2, model = "xgboost", params = list(nrounds = 20))
 
 dadnow2
 
-#autoplot(dadnow2, last_n = 50) +
-#  theme_bw()
+autoplot(dadnow2, last_n = 25, se = TRUE) +
+  theme_bw() +
+  facet_wrap( ~ model)
 
 ```
 

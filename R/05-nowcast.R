@@ -17,6 +17,8 @@ nowcast <- function(
     batches = 40, train_window = NULL, level = 0.95
   ) {
 
+  cat("Model:", model, "\n")
+  
   prepped_data <- prep_data(
     formula, data, model, date_col = date_col
   )
@@ -72,19 +74,24 @@ nowcast <- function(
     model == "mechanistic", yes = paste0("mech_", params$method), no =model
   )
   nowcasted_data$params <- paste0(names(params), params, collapse = "_")
-  nowcasted_data$pi_lower <- enbpi$enbpi[, 1]
-  nowcasted_data$pi_upper <- enbpi$enbpi[, 2]
+  nowcasted_data$pi_lower <- nowcast$prediction$prediction +
+    qnorm(1 - (1 - level)/2) * enbpi$se
+  nowcasted_data$pi_upper <- nowcast$prediction$prediction +
+    qnorm((1 - level)/2) * enbpi$se
+  nowcasted_data$formula <- deparse(formula)
 
   aug_data$model <- "Training"
   aug_data$params <- "None"
   aug_data$pi_lower <- NA
   aug_data$pi_upper <- NA
+  aug_data$formula <- NA
   aug_data <- rbind(aug_data, nowcasted_data)
 
   dadnow <- list(
     date_col = date_col,
     data = aug_data,
     evals = enbpi$evals,
+    response = response,
     batches = batches,
     train_window = train_window,
     level = level,
