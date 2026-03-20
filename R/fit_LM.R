@@ -15,14 +15,11 @@ fit_LM <- function(Y_train, X_train, X_nowcast, params = NULL) {
 
   colnames(XNowcast) <- colnames(full_data)[-1]
 
-  predicted_LM <- predict(
+  preds <- predict(
     fitted_LM, newdata = XNowcast, se.fit = TRUE, interval = "prediction"
-  )
-  preds <- data.frame(
-    prediction = predicted_LM$fit,
-    lower = predicted_LM$fit - 1.96 * predicted_LM$se.fit,
-    upper = predicted_LM$fit + 1.96 * predicted_LM$se.fit
-  )
+  )$fit |>
+    as.data.frame()
+  colnames(preds) <- c("prediction", "lower", "upper")
 
   list(model = fitted_LM, prediction = preds, fitted_values = fitted_LM$fitted.values)
 }
