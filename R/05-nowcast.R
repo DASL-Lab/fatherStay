@@ -2,7 +2,7 @@
 #'
 #' @param formula A formula, e.g. y ~ x, y ~ lag(x1, 1) + lag(x2, 3)
 #' @param data A data frame. Must contain the variables specified in the formula and in `date_col`. Trailing NA values in `y` will be nowcasted.
-#' @param model The model to use for nowcasting. Currently implemented: "lm", "ar". Can be a vector, in which case the model is trained for each model in the vector.
+#' @param model The model to use for nowcasting. See `vignette("Model_Details", package = "fatherStay")` and `vignette("Mechanistic_Model", package = "fatherStay")` for more information about currently implemented models, and `vignette("Write_fit_XX_functions", package = "fatherStay")` for how to write your own model for use in this package.
 #' @param batches The number of batches to use for training in the EnbPI calculation (akin to the number of folds for k-fold cross validation).
 #' @param train_window The number of days to use for training. Defaults to 60% of the training data, which allows for a large training set for each batch while also allowing for a reasonable amount of variation in the test sets.
 #' @param level The prediction interval level.
