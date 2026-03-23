@@ -9,5 +9,5 @@
 
 fit_arx <- function(Y_train, X_train = NULL, X_nowcast = NULL, params = list(p = 1)) {
   # this is just a wrapper function that calls the fit_AR model with the proper parameters
-  fit_AR(Y_train, X_train, X_nowcast, params)
+  fit_ar(Y_train, X_train, X_nowcast, params)
 }
