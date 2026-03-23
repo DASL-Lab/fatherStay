@@ -2,7 +2,7 @@ Package: fatherStay
 Title: Nowcasting for hospital admissions data
 Version: 0.8.0
 Authors@R: 
-    c(person("Devan", "Becker", , "dbecker@wlu.ca", role = c("aut", "cre"))
+    c(person("Devan", "Becker", , "dbecker@wlu.ca", role = c("aut", "cre")),
     person("Tomothy", "Marsh", , , role = c("aut"))
     )
 Description: Produce nowcasts using a variety of models, including AR, ARX, and mechanistic models according to the assumptions of how the data are generated. Ensemble batch prediction intervals are used to calculate prediction intervals and prediction metrics.
