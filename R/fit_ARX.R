@@ -7,6 +7,6 @@
 #'
 #' @returns Linear model object and predictions
 
-fit_ARX <- function(Y_train, X_train = NULL, X_nowcast = NULL, params = list(p = 1)) {
-  fit_AR(Y_train, X_train, X_nowcast, params)
+fit_arx <- function(Y_train, X_train = NULL, X_nowcast = NULL, params = list(p = 1)) {
+  fit_ar(Y_train, X_train, X_nowcast, params)
 }

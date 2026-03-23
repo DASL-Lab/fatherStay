@@ -7,7 +7,7 @@
 #'
 #' @returns XGBoost object and predictions
 
-fit_XGBoost <- function(Y_train, X_train = NULL, X_nowcast = NULL,
+fit_xgboost <- function(Y_train, X_train = NULL, X_nowcast = NULL,
                    params = list(nrounds = 100, verbose = 1,
                                  XGBparams = list())) {
 

@@ -39,7 +39,7 @@ An object of class "\code{dadnow}".
 Nowcast various models from a prepared data frame
 }
 \details{
-A short overview of the specific models used here is given below, more details can be found in the vignette \code{Model_Details}.
+A short overview of the specific models used here is given below, more details can be found in the vignette \code{Model_Details} and the individual help files (\verb{?fit_*}, where \code{*} is the name of the model).
 \itemize{
 \item "lm", a standard linear model, which takes no additional parameters.
 \item "ar", an autoregressive model, it has the parameter \code{p} which is the degree of the AR model.

@@ -9,7 +9,7 @@
 #'
 #' @returns GAM model object and predictions
 
-fit_GAM <- function(
+fit_gam <- function(
   Y_train, X_train = NULL, X_nowcast = NULL,
   params = list(family = gaussian, smooths = list(), bs = "tp")
 ) {

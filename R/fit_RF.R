@@ -11,7 +11,7 @@
 #'
 #' @returns Random Forest object and predictions
 
-fit_RF <- function(Y_train, X_train = NULL, X_nowcast = NULL,
+fit_rf <- function(Y_train, X_train = NULL, X_nowcast = NULL,
                    params = list(ntree = 500, mtry = NULL, weights = NULL, replace = TRUE, maxnodes = NULL, nodesize = 5)) {
   if (!requireNamespace("randomForest", quietly = TRUE)) {
     stop("Package \"randomForest\" must be installed to use this function.")

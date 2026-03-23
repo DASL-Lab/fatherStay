@@ -10,7 +10,7 @@
 #' @param date_col Name of the column containing date information. If NULL, the date information attempted to be inferred. If there's a single datetime column then it is used. If the data are a ts or mts or zoo object, the dates are esxtracted.
 #'
 #' @details
-#' A short overview of the specific models used here is given below, more details can be found in the vignette `Model_Details`.
+#' A short overview of the specific models used here is given below, more details can be found in the vignette `Model_Details` and the individual help files (`?fit_*`, where `*` is the name of the model).
 #' - "lm", a standard linear model, which takes no additional parameters.
 #' - "ar", an autoregressive model, it has the parameter `p` which is the degree of the AR model.
 #' - "arx", an autoregressive model with exogenous variables, it is an AR model that adds the capacity to consider explanatory variables, it has the same parameters as an ar model.
@@ -175,14 +175,14 @@ make_model_id <- function(evals) {
 #' @param model The model to use for nowcasting. If not specified, the function attempts to find a function called `model`. See `vignette("Write_fit_XX_functions", package = "fatherStay")` for how to write your own model for use in this package.
 dispatch_model <- function(model) {
   switch(model,
-    "lm" = fit_LM,
-    "ar" = fit_AR,
-    "arx" = fit_ARX,
-    "arima" = fit_ARIMA,
-    "gam" = fit_GAM,
-    "kf" = fit_KalmanFilter,
-    "rf" = fit_RF,
-    "xgboost" = fit_XGBoost,
+    "lm" = fit_lm,
+    "ar" = fit_ar,
+    "arx" = fit_arx,
+    "arima" = fit_arima,
+    "gam" = fit_gam,
+    "kf" = fit_kf,
+    "rf" = fit_rf,
+    "xgboost" = fit_xgboost,
     "mechanistic" = fit_mechanistic,
     model
   )

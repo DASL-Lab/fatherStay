@@ -8,7 +8,7 @@
 #'
 #' @returns Kalman Filter model object and predictions
 
-fit_KalmanFilter <- function(Y_train, X_train = NULL, X_nowcast = NULL,
+fit_kf <- function(Y_train, X_train = NULL, X_nowcast = NULL,
                              params = list(degree = 1)) {
 
   if (!requireNamespace("KFAS", quietly = TRUE)) {

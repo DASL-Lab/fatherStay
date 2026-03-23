@@ -7,7 +7,7 @@
 #'
 #' @returns Arima object and predictions
 
-fit_AR <- function(Y_train, X_train = NULL, X_nowcast = NULL, params = list(p = 1, d = 0, q = 0, n.ahead = 1)) {
+fit_ar <- function(Y_train, X_train = NULL, X_nowcast = NULL, params = list(p = 1, d = 0, q = 0, n.ahead = 1)) {
   # retrieve the number of future predictions to make, if not specified, then will be based on the number of rows in the nowcast data
   if (!"n.ahead" %in% names(params)) {
     n <- nrow(data.frame(X_nowcast))
