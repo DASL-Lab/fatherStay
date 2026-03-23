@@ -50,5 +50,6 @@ A short overview of the specific models used here is given below, more details c
 \item "rf", a random forest model, a tree based model that grows many trees and combines the output to pick a prediction, it takes parameters \code{ntree} the number of trees to grow, \code{mtry} the number of variables used as candidates at each split, \code{weights} weights the sample data, \code{replace} should sampling be done with or without replacement, \code{maxnodes} limits the number of terminal nodes, \code{nodesize} sets the minimum size of the terminal nodes.
 \item "xgboost", a extreme gradient boosting model, which is a tree based model in which subsequent trees learn from previous trees, it takes parameters \code{nrounds} which is the number of boosting iteration to do, and \code{XGBparams} a list of more parameters used in the model the most important of which is \code{max_depth} both \code{nrounds} and \code{max_depth} are tuned if their values are not specified, it also takes \code{verbose} should output be silent (0) or not (1).
 \item "mechanistic", creates a mechanistic model, \code{sc}, \code{sp}, and \code{method} specifies the family.
+\item See \code{vignette("Write_fit_XX_functions", package = "fatherStay")} for how to write your own model for use in this package.
 }
 }

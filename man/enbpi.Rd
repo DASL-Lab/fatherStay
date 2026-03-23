@@ -36,8 +36,8 @@ enbpi(
 \item{level}{The prediction interval level.}
 }
 \value{
-A dadnow object with the ensemble predictions and intervals added.
+A list containing the k-step ahead prediction standard errors and the evaluations of the models for the k-step ahead predictions.
 }
 \description{
-Ensemble batch prediction intervals and prediction metrics
+EnbPI takes \code{batches} of training data, fits a model to each batch, and then uses the residuals to calculate prediction intervals and prediction metrics. This targets the exact standard errors that we're looking for. If we're doing 8-step ahead nowcasting, we need an estimate of the standard error for the eighth step ahead, not just the general standard error for predictions. This is a model-agnostic approach to calculating prediction intervals.
 }

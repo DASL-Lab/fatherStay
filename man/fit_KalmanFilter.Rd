@@ -20,7 +20,7 @@ fit_KalmanFilter(
 
 \item{degree}{For trend component, integer defining the degree of the polynomial trend}
 
-\item{CovMatrix}{Covariance matrix or array of disturbance terms $\epsilon_t$ of observation equation}
+\item{CovMatrix}{Covariance matrix or array of disturbance terms epsilon_t of observation equation}
 }
 \value{
 Kalman Filter model object and predictions

@@ -22,7 +22,7 @@ library(ggplot2)
 
 We'll start by simulating some data from a mechanistic model. The `simulate_mechanistic()` function generates a data frame with a single time series, with the response variable `dad` and covariates `cnisp`, `ptsos`, and `npos`. The data frame also include a `date` column. The last 10 observations are NA, which will be used for nowcasting.
 
-```{r}
+```{r make_data}
 df <- simulate_mechanistic()
 tail(df, 12) # last 10 are NA - to be nowcast!
 pairs(df[, -1])
@@ -36,7 +36,7 @@ The `add_nowcast()` interface allows for new formulas to be specified when addin
 
 There's also an `autoplot()` method for "multidadnow" objects, which plots the nowcast against the observed data. By default, it plots all training data in the "multidadnow" object, but the `last_n` argument can be used to specify how many of the most recent observations to plot.
 
-```{r}
+```{r nowcast}
 dadnow2 <- nowcast(
   formula = dad ~ lag(cnisp, 3) + lag(ptsos, 3),
   data = df, 
@@ -52,7 +52,7 @@ dadnow2 <- add_nowcast(dadnow2, model = "ar", params = list(order = 2)) |>
   add_nowcast("gam", params = list(smooths = list("cnisp_lag0"=10))) |>
   add_nowcast("rf", formula = dad ~ lag(cnisp, 2), params = list(ntree = 50, mtry = 3))
 
-dadnow2 <- add_nowcast(dadnow2, model = "xgboost", params = list(nrounds = 20))
+dadnow2 <- add_nowcast(dadnow2, model = "xgboost", params = list(nrounds = 10))
 
 dadnow2
 
@@ -94,25 +94,91 @@ library(patchwork)
 gg_ptsos <- ggplot(df, aes(x = date, y = ptsos)) + geom_line()
 gg_cnisp <- ggplot(df, aes(x = date, y = cnisp)) + geom_line()
 
-#gg_dadnow <- autoplot(dadnow2, last_n = 150) +
-#  theme_bw()
+gg_dadnow <- autoplot(dadnow2, last_n = 150) +
+  theme_bw()
 
-#gg_dadnow / gg_ptsos / gg_cnisp
+gg_dadnow / gg_ptsos / gg_cnisp
 ```
 
-# Work in Progress
+The data can be extracted from the "multidadnow" object using the `get_predictions()` and `get_model()` functions.
 
-- ~~Prediction intervals~~
-  - Plot the prediction intervals well (esp with many models)
-  - Take prediction intervals from model output where possible?
-  - Expose options to user (e.g., how many models to use for prediction intervals, prediction interval level, etc.)
-  
-- Built-in plots for nowcast against covariates
-  - One covariate at a time
-  - Two covariates (heatmap-like)?
+The data can be extracted from the "multidadnow" object in order to check for patterns in the predictions:
 
-- ~~Multiple formulae in one `dadnow` object~~ Completed!
+```{r}
+train_preds <- get_data(dadnow2, include_training = TRUE)
 
-- ~~Mechanistic model~~ Completed!
-  - Make the intercept term optional (poor performance without intercept on my test data due to many zeros, may not be true in practice).
+gg_npos <- ggplot(train_preds, aes(x = npos, y = dad, colour = model_id)) + geom_point()
+gg_ptsos <- ggplot(train_preds, aes(x = ptsos, y = dad, colour = model_id)) + geom_point()
+gg_cnisp <- ggplot(train_preds, aes(x = cnisp, y = dad, colour = model_id)) + geom_point()
+
+gg_npos + gg_ptsos + gg_cnisp + plot_layout(ncol = 2, guides = "collect")
+```
+
+And residual plots can be made as follows:
+
+```{r}
+resids <- get_residuals(dadnow2)
+
+ggplot(resids, aes(x = fitted_value, y = residual, colour = model_id)) +
+  geom_point() +
+  facet_wrap(~ model_id)
+```
+
+
+## Evaluation Metrics
+
+The evaluation metrics come from the `fatherStay:::enbpi()` function, which uses Ensemble batch prediction intervals to calculate prediction intervals and prediction metrics. This works by creating many different "batches" (which are contiguous sets of data, i.e., using all data in a time interval), each with the same number of training observations; fitting a model to the batch; and then predicting $k$ steps ahead ($k$ is chosen based on the amount of trailing NAs in DAD data, i.e., the number of nowcasts to be made). For example, if there are 10 points in the data to be nowcast and you choose `batches=40` with `training_window=NULL`, then the function will create 40 batches, each with 60% of the training data, fit a model, then calculate the 10-step ahead predictions from each model. The batches all have the same size but a random starting index, meaning that we get data without time jumps.
+
+From each batch, we have a set of predictions compared to actual values. The standard deviation of the 1-step ahead prediction can be calculated from the batches, then the standard deviation of the 2-step ahead, etc. This gives us an empirical measure of the prediction intervals for our particular nowcasting scenario.
+
+This is similar to k-fold cross-validation, but targeted to a nowcasting scenario. With k-fold CV, the data into k folds and we predict all of the data from each fold. This does not take the ordering of the data into account, and the evaluation metrics are based on the amounts of data in each fold (for example, in 10-fold CV, each fold has 1/10 of the data). EnBPI takes the ordering into account and also finds metrics (RMSE, MAE, and MRE) based on exactly the sort of predictions that we are making.
+
+- More batches means more accurate prediction intervals, but also more computationally intensive.
+- 60% of the training data is used for each batch, leaving space for a variety of intervals while also using enough of the data for training.
+    - To see why, consider the case where we have 100 data points, 5-step ahead predictions, and we use 95% of the data in each batch. Since we need space to do 5-step ahead predictions, every single batch is going to be the first 95 data points! If we used 60% instead, then the batches will have starting indices anywhere between 0 and 45, so we have a greater variety of k-step ahead predictions.
+    - If we used 5% of the data in each batch, we would be training on only 5 data points each time, which is not a good reflection of the amount of data that we actually have.
+- The `level` is just the prediction interval level. The prediction intervals are calculated based on an asymptotic normality assumption: the standard error ($SE$) is caclulated empirically, then the interval is calculated as $\hat y \pm z_{(1 - \texttt{level})/2} SE$.
+
+The parameters for EnBPI can be specified in the nowcast function, then `add_nowcast()` will read those parameters and use them for any additional nowcasts. The defaults are shown below. If two sets of `multidadnow` objects have different values for `batches`, `train_window`, or `level`, then `combine_nowcasts()` will fail since the results are not comparable. 
+
+```{r}
+system.time(
+  dadnow4 <- nowcast(
+    dad ~ lag(cnisp, 3) + lag(ptsos, 3),
+    df, model = "ar", date_col = "date", params = list(order = 1),
+    batches = 40, train_window = NULL, level = 0.95
+  )
+) |> print()
+
+system.time(
+  dadnow5 <- nowcast(
+    dad ~ lag(cnisp, 3) + lag(ptsos, 3),
+    df, model = "ar", date_col = "date", params = list(order = 1),
+    batches = 100, train_window = NULL, level = 0.95
+  )
+)
+```
+
+
+
+## Further Details
+
+A "multidadnow" object is just a list, where certain information that is common to all models are at the highest level, and the models themselves are stored in a list within the object.
+
+```{r}
+names(dadnow2)
+
+```
+
+```{r}
+names(dadnow2$models)
+```
+
+It is most convenient to use the `get_model()` and `get_predictions()` functions to extract information from the "multidadnow" object, but you can also directly access the list elements.
+
+```{r}
+dadnow2$models[["f1_lm"]]$model
+get_model(dadnow2, "f1_lm")
+```
+
 

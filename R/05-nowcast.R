@@ -124,10 +124,12 @@ nowcast <- function(
     models = list(
       list(
         model_id = make_model_id(enbpi$evals),
+        model_name = model,
         formula = formula,
         prepped_data = prepped_data,
         model = nowcast$model,
         predictions = nowcast$prediction,
+        fitted_values = nowcast$fitted_values,
         evals = enbpi$evals,
         enbpi = enbpi$enbpi,
         params = params

@@ -4,7 +4,7 @@
 #' @param Y_Train Training data for the response variable
 #' @param X_Nowcast Data to make predictions bases on3
 #' @param degree For trend component, integer defining the degree of the polynomial trend
-#' @param CovMatrix Covariance matrix or array of disturbance terms $\epsilon_t$ of observation equation
+#' @param CovMatrix Covariance matrix or array of disturbance terms epsilon_t of observation equation
 #'
 #' @returns Kalman Filter model object and predictions
 

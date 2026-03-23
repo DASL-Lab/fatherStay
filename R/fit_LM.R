@@ -21,5 +21,7 @@ fit_LM <- function(Y_train, X_train, X_nowcast, params = NULL) {
     as.data.frame()
   colnames(preds) <- c("prediction", "lower", "upper")
 
-  list(model = fitted_LM, prediction = preds, fitted_values = fitted_LM$fitted.values)
+  fitted <- predict(fitted_LM, newdata = X_train)
+
+  list(model = fitted_LM, prediction = preds, fitted_values = fitted)
 }

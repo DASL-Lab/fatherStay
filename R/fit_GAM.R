@@ -70,5 +70,7 @@ fit_GAM <- function(
 
   predicted_GAM <- data.frame(prediction = predict(fitted_GAM, newdata = XNowcast))
 
-  list(model = fitted_GAM, prediction = predicted_GAM, fitted_values = fitted_GAM$fitted.values)
+  fitted <- predict(fitted_GAM, newdata = X_train)
+
+  list(model = fitted_GAM, prediction = predicted_GAM, fitted_values = fitted)
 }
