@@ -13,7 +13,7 @@ print.multidadnow <- function(dadnow) {
   )
 
   cat("\nTest set evaluation metrics:\n")
-  print(dadnow$evals)
+  print(get_evals(dadnow, sort = "rmse"))
   if (any(dadnow$models[[1]]$prepped_data$y_test == 0)) {
     cat("Note: There are zeros in the test set, which affects the mean relative error.\n")
   }

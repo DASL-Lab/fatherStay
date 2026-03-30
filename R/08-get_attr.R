@@ -93,12 +93,16 @@ get_data <- function(dadnow, include_training = TRUE) {
 #' Get the evaluation metrics from a dadnow object
 #'
 #' @param dadnow A dadnow object.
+#' @param sort The metric to sort by. Defaults to "rmse",but can also be "mae" or "mre" or NULL.
 #'
 #' @returns A data frame with the evaluation metrics.
 #' @export
-get_evals <- function(dadnow) {
+get_evals <- function(dadnow, sort = "rmse") {
   evals <- dadnow$evals
   evals$model_id <- rownames(evals)
-
-  evals
+  if (!is.null(sort)) {
+    return(evals[order(evals[, sort]), ])
+  } else {
+    return(evals)
+  }
 }

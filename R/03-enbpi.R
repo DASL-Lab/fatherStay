@@ -51,9 +51,7 @@ enbpi <- function(X_train, y_train, model, formula, params, k, batches = 40, tra
   # For AR, and "AR with order 1" is an AR(1) (similar for ARX)
   # For mechanistic, it's important to note the method used.
   # This is done here because the rows of the evals table are used to tell models apart elsewhere.
-  if (model %in% c("ar", "arx")) {
-    model <- paste0(model, params$order)
-  } else if (model == "mechanistic") {
+  if (model == "mechanistic") {
     model <- paste0("mech_", params$method)
   }
 
