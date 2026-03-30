@@ -7,18 +7,16 @@
 fit_kf(Y_train, X_train = NULL, X_nowcast = NULL, params = list(degree = 1))
 }
 \arguments{
+\item{params}{Named list containing additional parameters: \code{degree} For trend component, integer defining the degree of the polynomial trend}
+
 \item{X_Train}{Training data for the explanatory variables in the model}
 
 \item{Y_Train}{Training data for the response variable}
 
-\item{X_Nowcast}{Data to make predictions bases on3}
-
-\item{degree}{For trend component, integer defining the degree of the polynomial trend}
-
-\item{CovMatrix}{Covariance matrix or array of disturbance terms epsilon_t of observation equation}
+\item{X_Nowcast}{Current data of X_train for which there is no Y_train data, used to make nowcasts}
 }
 \value{
-Kalman Filter model object and predictions
+A named list containing: Kalman Filter model object, predictions, and fitted values
 }
 \description{
 Fit a Kalman Filter model on given data and make predictions for a given set of data

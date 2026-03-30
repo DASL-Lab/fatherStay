@@ -49,7 +49,7 @@ fit_ar <- function(Y_train, X_train = NULL, X_nowcast = NULL, params = list(p = 
   preds <- predict(AR_mod, n, X_nowcast)
 
   # put the predictions into a data frame and add 95% confidence bands
-  predictions <- data.frame(prediction = preds$pred, lower = preds$pred - 1.96 * preds$se, upper = preds$pred + 1.96 * preds$se)
+  predictions <- data.frame(prediction = as.numeric(preds$pred), lower = as.numeric(preds$pred - 1.96 * preds$se), upper = as.numeric(preds$pred + 1.96 * preds$se))
 
   # find the fitted values of the model
   fitVals <- Y_train - AR_mod$residuals
