@@ -72,7 +72,7 @@ fit_kf <- function(Y_train, X_train = NULL, X_nowcast = NULL,
   )
 
   # generate the predictions
-  prediction <- data.frame(prediction = predict(fitMod, newdata = newMod))
+  prediction <- data.frame(prediction = as.numeric(predict(fitMod, newdata = newMod)))
 
   # generate the fitted values
   fits <- predict(fitMod, newdata = oldMod)
