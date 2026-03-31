@@ -9,8 +9,8 @@ test_that("Kalman Filter works", {
   X_nowcast <- data.frame(x1 = c(1, 2, 3), x2 = c(2,3,1), x3 = c(6,7,3))
   data <- data.frame(testY,testX)
   
-  suppressWarnings(KFMod <- fit_KalmanFilter(testY, testX, X_nowcast))
+  suppressWarnings(KFMod <- fit_kf(testY, testX, X_nowcast))
 
   
-  expect_equal(KFMod$prediction, c(1.5,1.8,1), tolerance = 0.1)
+  expect_equal(KFMod$prediction[[1]], c(1.5,1.8,1), tolerance = 0.1)
 })

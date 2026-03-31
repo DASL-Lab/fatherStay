@@ -7,6 +7,10 @@
 #' @returns Linear model object and predictions
 
 fit_lm <- function(Y_train, X_train, X_nowcast, params = NULL) {
+  Y_train <- as.data.frame(Y_train)
+  X_train <- as.data.frame(X_train)
+  X_nowcast <- as.data.frame(X_nowcast)
+  
   full_data <- as.data.frame(cbind(Y_train, X_train))
 
   fitted_LM <- lm(Y_train ~ ., data = full_data)
