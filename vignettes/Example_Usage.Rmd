@@ -41,15 +41,15 @@ dadnow2 <- nowcast(
   data = df, 
   model = "ar", 
   date_col = "date", 
-  params = list(order = 1)
+  params = list(p = 1)
 )
 
-dadnow2 <- add_nowcast(dadnow2, model = "ar", params = list(order = 2)) |>
+dadnow2 <- add_nowcast(dadnow2, model = "ar", params = list(p = 2)) |>
   add_nowcast("lm") |>
   add_nowcast("lm", formula = dad ~ cnisp + ptsos + npos) |>
-  add_nowcast("arx", params = list(order = 1)) |>
-  add_nowcast("arx", formula = dad ~ npos, params = list(order = 1)) |>
-  add_nowcast("arx", formula = dad ~ npos, params = list(order = 2)) |>
+  add_nowcast("arx", params = list(p = 1)) |>
+  add_nowcast("arx", formula = dad ~ npos, params = list(p = 1)) |>
+  add_nowcast("arx", formula = dad ~ npos, params = list(p = 2)) |>
   add_nowcast("gam", params = list(smooths = list("cnisp_lag0"=10))) |>
   add_nowcast("rf", formula = dad ~ lag(cnisp, 2), params = list(ntree = 50, mtry = 3))
 
@@ -164,7 +164,7 @@ The parameters for EnBPI can be specified in the nowcast function, then `add_now
 system.time(
   dadnow4 <- nowcast(
     dad ~ lag(cnisp, 3) + lag(ptsos, 3),
-    df, model = "ar", date_col = "date", params = list(order = 1),
+    df, model = "ar", date_col = "date", params = list(p = 1),
     batches = 40, train_window = NULL, level = 0.95
   )
 ) |> print()
@@ -172,7 +172,7 @@ system.time(
 system.time(
   dadnow5 <- nowcast(
     dad ~ lag(cnisp, 3) + lag(ptsos, 3),
-    df, model = "ar", date_col = "date", params = list(order = 1),
+    df, model = "ar", date_col = "date", params = list(p = 1),
     batches = 100, train_window = NULL, level = 0.95
   )
 )
