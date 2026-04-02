@@ -76,9 +76,11 @@ The evaluations can easily be extracted and plotted:
 evals <- get_evals(dadnow2)
 
 ggplot(evals) +
-  aes(x = reorder(model_id, mae), y = mae, fill = model) +
+  aes(x = reorder(model_id, mae), y = mae, fill = model, group = params) +
   geom_col() +
-  theme_bw()
+  theme_bw() +
+  coord_flip() +
+  theme(legend.position = "bottom")
 ```
 
 The package includes a "mechanistic" model, which can be seen in `vignette("Mechanistic_Model", package = "dadnowcast")`. The model takes the parameters `sc` and `sp` and requires a method ("normal", "poisson", or "negbinom") to specify the distribution of the error term. Because it works slightly differently than the other models, it is added to a "multidadnow" object using the `add_mechanistic` function, which takes the same formula interface as `nowcast` but with different parameters. The mechanistic model can be added alongside the other models, and the same plotting and evaluation functions can be used.

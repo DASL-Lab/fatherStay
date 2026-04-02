@@ -1,6 +1,6 @@
 Package: dadnowcast
 Title: Nowcasting for hospital admissions data
-Version: 0.8.0
+Version: 0.9.0
 Authors@R: 
     c(person("Devan", "Becker", , "dbecker@wlu.ca", role = c("aut", "cre")),
     person("Tomothy", "Marsh", , , role = c("aut"))

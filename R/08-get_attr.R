@@ -83,7 +83,7 @@ get_data <- function(dadnow, include_training = TRUE) {
 })
   nowcasted_data <- do.call(rbind, nowcasted_data)
   if (include_training) {
-    train <- dadnow$data[1:length(dadnow2$models[[1]]$prepped_data$dates_train), ]
+    train <- dadnow$data[1:length(dadnow$models[[1]]$prepped_data$dates_train), ]
     train$model_id = NA
     nowcasted_data <- rbind(train, nowcasted_data)
   }
@@ -100,6 +100,7 @@ get_data <- function(dadnow, include_training = TRUE) {
 get_evals <- function(dadnow, sort = "rmse") {
   evals <- dadnow$evals
   evals$model_id <- rownames(evals)
+  evals$model_long <- ifelse(evals$params == "", evals$model, paste0(evals$model_id, "_", evals$params))
   if (!is.null(sort)) {
     return(evals[order(evals[, sort]), ])
   } else {
