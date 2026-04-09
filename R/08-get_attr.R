@@ -9,8 +9,8 @@ get_model <- function(dadnow, model_id) {
   if (length(model_id) != 1) {
     stop("Only one model can be extracted from a dadnow object at a time.")
   }
-  if (!model_id %in% dadnow$models) {
-    stop("The model id is not found in the dadnow object.")
+  if (!model_id %in% names(dadnow$models)) {
+    stop(paste0("The model id is not found in the dadnow object. Available model ids are: ", paste(dadnow$models, collapse = ", ")))
   }
   dadnow$models[[model_id]]$model
 }
@@ -26,8 +26,8 @@ get_formula <- function(dadnow, model_id) {
   if (length(model_id) != 1) {
     stop("Only one model can be extracted from a dadnow object at a time.")
   }
-  if (!model_id %in% dadnow$models) {
-    stop("The model id is not found in the dadnow object.")
+  if (!model_id %in% names(dadnow$models)) {
+    stop(paste0("model_id is not found in the dadnow object. Available model ids are: ", paste(names(dadnow$models), collapse = ", ")))
   }
   dadnow$models[[model_id]]$formula
 }
@@ -45,7 +45,7 @@ get_predictions <- function(dadnow, model_ids = NULL) {
     dadnow <- extract(dadnow, model_ids)
   }
   if (any(!model_ids %in% dadnow$models)) {
-    stop("At least one model_ids is not found in the dadnow object.")
+    stop(paste0("At least one model id is not found in the dadnow object. Available model ids are: ", paste(names(dadnow$models), collapse = ", ")))
   }
 
   get_data(dadnow, include_training = FALSE)
