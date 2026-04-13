@@ -12,13 +12,52 @@
 #' @param train_window The number of days to use for training. Defaults to 60% of the training data, which allows for a large training set for each batch while also allowing for a reasonable amount of variation in the test sets.
 #'
 #' @returns A list containing the k-step ahead prediction standard errors and the evaluations of the models for the k-step ahead predictions.
-enbpi <- function(X_train, y_train, model, formula, params, k, batches = 40, train_window = NULL) {
+enbpi <- function(X_train, y_train, model, formula, params, k, batches = 40, train_window = NULL, se = TRUE) {
+
+  # Return NAs if enbpi is not used.
+  if (!se) {
+    
+    evals = data.frame(
+      "formula" = deparse(formula),
+      "model" = model,
+      "params" = paste0(names(params), params, collapse = "_"),
+      "rmse" = NA,
+      "mae" = NA,
+      "mre" = NA
+    )
+
+    return(list(se = rep(NA, k), evals = evals))
+  }
 
   # If the train_window is not specified, set it to 60% of the training data
   if (is.null(train_window)) train_window <- floor(0.6 * length(y_train))
+  
+  # There needs to be at least 5 possible indices to start a window on.
+  if (length(y_train) - k - train_window < 5) {
+    train_window <- length(y_train) - k - 5
+    warning(
+      paste0(
+        "There were fewer than 5 possible indices to start an ensemble batch prediction interval.",
+        "\n  Setting train_window to:",
+        "\n     length_of_training_data - number_of_steps_to_predict - 5 = ",
+        train_window, "\n  Resultant prediction intervals and evaluation metrics may be unreliable."
+      )
+    )
+  }
 
   # Indices must be sampled such that the test data is still within the training data
   train_indices <- sample(1:(length(y_train) - k - train_window), batches, replace = TRUE)
+
+  if (any(train_indices < 1)) {
+    stop(
+      paste0(
+        "The training data minus the k-steps minus the size of the training window is ",
+        length(y_train), " - ", k, " - ", train_window, " = ",
+        length(y_train) - k - train_window, ".",
+        "Set train_window to a smaller value or set enbpi to FALSE."
+      )
+    )
+  }
 
   preds <- vector(mode = "list", length = batches)
   resids <- vector(mode = "list", length = batches)

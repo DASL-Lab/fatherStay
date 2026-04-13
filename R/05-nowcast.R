@@ -8,6 +8,7 @@
 #' @param level The prediction interval level.
 #' @param params The parameters to use for the model. Must be a named list.
 #' @param date_col Name of the column containing date information. If NULL, the date information attempted to be inferred. If there's a single datetime column then it is used. If the data are a ts or mts or zoo object, the dates are esxtracted.
+#' @param se Should the standard errors and evaluation metrics be calculated by ensemble-based batch prediction intervals (EnbPI)? If FALSE, the function will return NAs for the standard errors and evaluation metrics.
 #'
 #' @details
 #' A short overview of the specific models used here is given below, more details can be found in the vignette `Model_Details` and the individual help files (`?fit_*`, where `*` is the name of the model).
@@ -28,7 +29,7 @@
 #' @export
 nowcast <- function(
     formula, data, model, params = NULL, date_col = NULL,
-    batches = 40, train_window = NULL, level = 0.95
+    batches = 40, train_window = NULL, level = 0.95, se = TRUE
   ) {
 
   cat("Model:", model, "\n")
@@ -70,7 +71,8 @@ nowcast <- function(
     params = params,
     k = nrow(X_now),
     batches = batches,
-    train_window = train_window
+    train_window = train_window,
+    se = se
   )
 
   # Fit to all training, create nowcast
